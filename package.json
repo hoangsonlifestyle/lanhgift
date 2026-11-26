@@ -1,0 +1,6 @@
+{
+  "name": "lanhgift-tet-2027",
+  "private": true,
+  "description": "Trang Tết 2027 Mùi Lành và trang quản lý đơn COD",
+  "engines": { "node": "22.x" }
+}
