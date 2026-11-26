@@ -58,6 +58,13 @@ button{cursor:pointer}
 .od__who a{color:inherit}
 .od__who .ph{font-weight:700;text-decoration:none;font-variant-numeric:tabular-nums}
 .od__note{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:#FFF5E6;font-size:.88rem}
+.od__money{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:#FBF3E4;display:grid;gap:6px;font-size:.88rem}
+.od__money .row1{display:flex;flex-wrap:wrap;gap:4px 12px;color:#5A4636}
+.od__money .cod{font-size:1rem;font-weight:800;color:var(--muc);font-variant-numeric:tabular-nums}
+.od__money .cod.is-wait{color:var(--do);font-size:.9rem}
+.shipf{display:flex;gap:6px;align-items:center}
+.shipf input{width:132px;height:40px;padding:0 12px;border-radius:999px;border:1.5px solid var(--vien);background:#fff;font-size:16px;font-variant-numeric:tabular-nums}
+.shipf input:focus{outline:none;border-color:var(--do)}
 .od__acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;align-items:center}
 .a{height:40px;padding:0 12px;border-radius:999px;border:1.5px solid var(--vien);background:#fff;color:var(--muc);font-size:.82rem;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:transform .15s ease-out,background-color .2s ease}
 .a:active{transform:scale(.96)}
@@ -101,7 +108,7 @@ button{cursor:pointer}
     <div class="stats">
       <div class="st"><b id="s-new">0</b><span>đơn mới chờ xử lý</span></div>
       <div class="st"><b id="s-today">0</b><span>đơn hôm nay</span></div>
-      <div class="st"><b id="s-sum">0đ</b><span>giá trị đơn (trừ huỷ)</span></div>
+      <div class="st"><b id="s-sum">0đ</b><span>tiền quà (trừ huỷ)</span></div>
     </div>
     <div class="tools">
       <input id="q" type="search" placeholder="Tìm tên, số điện thoại, mã đơn" aria-label="Tìm đơn">
@@ -124,7 +131,11 @@ const tz={timeZone:'Asia/Ho_Chi_Minh'};
 const fmtTime=s=>new Date(s).toLocaleString('vi-VN',{...tz,hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
 const dayKey=s=>new Date(s).toLocaleDateString('en-CA',tz);
 const phoneFmt=p=>String(p).replace(/(\d{4})(\d{3})(\d{3})/,'$1 $2 $3');
-let orders=[],filter='moi',seen=new Set(),first=true,timer=0,audio=null;
+let orders=[],filter='moi',seen=new Set(),first=true,timer=0,audio=null,later=false;
+const ZN={hcm:'Nội thành TP.HCM',tinh:'Tỉnh khác'};
+const zoneOf=o=>ZN[o.zone]||'Chưa chọn nơi giao';
+const codOf=o=>o.cod_total!=null?'Thu hộ COD: '+vnd(o.cod_total):'Thu hộ COD: '+vnd(o.total)+' tiền quà + phí ship (chưa nhập)';
+const typing=()=>{const a=document.activeElement;return !!(a&&a.closest&&a.closest('#list .shipf'))};
 
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2600)}
 async function api(path,opt){const r=await fetch(path,Object.assign({credentials:'same-origin',headers:{'Content-Type':'application/json'}},opt||{}));
@@ -147,10 +158,10 @@ async function load(){
   try{const j=await api('/api/bo-orders');orders=j.orders||[];
     const fresh=orders.filter(o=>!seen.has(o.id));
     if(!first&&fresh.length){beep();document.title='('+fresh.length+') Đơn mới · Đơn Lành';
-      if('Notification' in window&&Notification.permission==='granted'){const o=fresh[0];try{new Notification('Đơn mới '+o.code,{body:o.set_name+' × '+o.qty+' · '+vnd(o.total)+'\n'+o.name+' · '+phoneFmt(o.phone)})}catch(e){}}}
+      if('Notification' in window&&Notification.permission==='granted'){const o=fresh[0];try{new Notification('Đơn mới '+o.code,{body:o.set_name+' × '+o.qty+' · '+vnd(o.cod_total!=null?o.cod_total:o.total)+'\n'+o.name+' · '+phoneFmt(o.phone)+' · '+zoneOf(o)})}catch(e){}}}
     fresh.forEach(o=>o._new=!first);orders.forEach(o=>seen.add(o.id));first=false;
     if($('app').hidden)showApp();
-    $('sync').textContent='Cập nhật '+new Date().toLocaleTimeString('vi-VN',{...tz,hour:'2-digit',minute:'2-digit',second:'2-digit'});render()}
+    $('sync').textContent='Cập nhật '+new Date().toLocaleTimeString('vi-VN',{...tz,hour:'2-digit',minute:'2-digit',second:'2-digit'});if(typing())later=true;else render()}
   catch(e){if(e.message!=='login')$('sync').textContent='Lỗi tải đơn, sẽ thử lại'}}
 function start(){load();clearInterval(timer);timer=setInterval(()=>{if(!document.hidden)load()},20000)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){document.title='Đơn Lành · Quản lý';if(!$('app').hidden)load()}});
@@ -172,6 +183,8 @@ function render(){
     el.innerHTML='<div class="od__h"><span class="od__code"></span><span class="od__time"></span><span class="od__badge"></span></div>'+
       '<p class="od__set"><span class="sn"></span><b class="tt"></b></p>'+
       '<div class="od__who"><span class="nm"></span><a class="ph" href="tel:'+o.phone+'"></a><span class="ad"></span></div>'+
+      '<div class="od__money"><div class="row1"><span class="zn"></span><span class="sf"></span></div><span class="cod"></span>'+
+      '<form class="shipf"><input name="fee" inputmode="numeric" autocomplete="off" placeholder="VD 30k" aria-label="Phí ship của đơn"><button class="a" type="submit">Lưu phí ship</button></form></div>'+
       (o.note?'<p class="od__note"></p>':'')+
       '<div class="od__acts"><a class="a a--call" href="tel:'+o.phone+'">Gọi</a><a class="a a--zalo" href="https://zalo.me/'+o.phone+'" target="_blank" rel="noopener">Zalo</a>'+
       '<button class="a" type="button" data-copy>Chép thông tin giao</button><a class="a" href="'+map+'" target="_blank" rel="noopener">Bản đồ</a>'+
@@ -179,6 +192,9 @@ function render(){
     el.querySelector('.od__code').textContent=o.code;el.querySelector('.od__time').textContent=fmtTime(o.created_at)+(o.source?' · '+o.source:'');
     el.querySelector('.od__badge').textContent=SN[o.status]||o.status;
     el.querySelector('.sn').textContent=o.set_name+' × '+o.qty;el.querySelector('.tt').textContent=vnd(o.total);
+    el.querySelector('.zn').textContent='Giao: '+zoneOf(o);el.querySelector('.sf').textContent=o.ship_fee!=null?'Phí ship '+vnd(o.ship_fee):'Phí ship: chưa có';
+    const cd=el.querySelector('.cod');cd.textContent=codOf(o);cd.classList.toggle('is-wait',o.cod_total==null);
+    el.querySelector('.shipf input').value=o.ship_fee!=null?o.ship_fee:'';
     el.querySelector('.nm').textContent=o.name;el.querySelector('.ph').textContent=phoneFmt(o.phone);el.querySelector('.ad').textContent=o.address;
     if(o.note)el.querySelector('.od__note').textContent='Ghi chú: '+o.note;
     list.appendChild(el);
@@ -187,14 +203,20 @@ function render(){
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(!b)return;filter=b.dataset.f;render()});
 $('q').addEventListener('input',render);
 $('list').addEventListener('click',async e=>{const b=e.target.closest('[data-copy]');if(!b)return;const o=orders.find(x=>x.id==b.closest('.od').dataset.id);if(!o)return;
-  const t=o.name+'\n'+phoneFmt(o.phone)+'\n'+o.address+'\n'+o.set_name+' × '+o.qty+'\nThu hộ COD: '+vnd(o.total)+(o.note?'\nGhi chú: '+o.note:'')+'\nMã đơn: '+o.code;
+  const t=o.name+'\n'+phoneFmt(o.phone)+'\n'+o.address+' ('+zoneOf(o)+')\n'+o.set_name+' × '+o.qty+'\n'+codOf(o)+(o.note?'\nGhi chú: '+o.note:'')+'\nMã đơn: '+o.code;
   try{await navigator.clipboard.writeText(t);toast('Đã chép thông tin giao hàng')}catch(err){prompt('Chép thông tin giao hàng',t)}});
 $('list').addEventListener('change',async e=>{const s=e.target.closest('select');if(!s)return;const card=s.closest('.od'),id=+card.dataset.id,o=orders.find(x=>x.id===id),prev=o.status;
   s.disabled=true;try{const j=await api('/api/bo-orders',{method:'POST',body:JSON.stringify({id,status:s.value})});Object.assign(o,j.order);o._new=false;toast(o.code+': '+SN[o.status]);render()}
   catch(err){if(err.message!=='login'){s.value=prev;toast('Chưa đổi được trạng thái, thử lại')}}finally{s.disabled=false}});
-$('csv').addEventListener('click',()=>{const head=['Mã đơn','Thời gian','Trạng thái','Set','Số lượng','Đơn giá','Thành tiền','Tên','Điện thoại','Địa chỉ','Ghi chú','Nguồn'];
+$('list').addEventListener('submit',async e=>{const f=e.target.closest('.shipf');if(!f)return;e.preventDefault();const id=+f.closest('.od').dataset.id,o=orders.find(x=>x.id===id);
+  const raw=f.fee.value.trim();let fee=raw===''?null:parseInt(raw.replace(/\D/g,''),10);if(fee!==null&&/k$/i.test(raw))fee*=1000;else if(fee!==null&&fee>0&&fee<1000)fee*=1000;
+  if(fee!==null&&(isNaN(fee)||fee>2000000)){toast('Phí ship chưa đúng, ví dụ 30000 hoặc 30k');return}
+  const b=f.querySelector('button');b.disabled=true;try{const j=await api('/api/bo-orders',{method:'POST',body:JSON.stringify({id,ship_fee:fee})});Object.assign(o,j.order);toast(o.code+': phí ship '+(o.ship_fee!=null?vnd(o.ship_fee):'đã xoá'));f.fee.blur();later=false;render()}
+  catch(err){if(err.message!=='login')toast('Chưa lưu được phí ship, thử lại')}finally{b.disabled=false}});
+$('list').addEventListener('focusout',()=>setTimeout(()=>{if(later&&!typing()){later=false;render()}},0));
+$('csv').addEventListener('click',()=>{const head=['Mã đơn','Thời gian','Trạng thái','Set','Số lượng','Đơn giá','Tiền quà','Nơi giao','Phí ship','Thu hộ COD','Tên','Điện thoại','Địa chỉ','Ghi chú','Nguồn'];
   const esc=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const lines=[head.map(esc).join(',')].concat(orders.map(o=>[o.code,fmtTime(o.created_at),SN[o.status],o.set_name,o.qty,o.unit_price,o.total,o.name,"'"+o.phone,o.address,o.note,o.source].map(esc).join(',')));
+  const lines=[head.map(esc).join(',')].concat(orders.map(o=>[o.code,fmtTime(o.created_at),SN[o.status],o.set_name,o.qty,o.unit_price,o.total,ZN[o.zone]||'',o.ship_fee,o.cod_total,o.name,"'"+o.phone,o.address,o.note,o.source].map(esc).join(',')));
   const blob=new Blob(['﻿'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download='don-lanh-'+dayKey(new Date())+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
 start();

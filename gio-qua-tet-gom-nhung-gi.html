@@ -153,6 +153,8 @@ html.od-lock,html.od-lock body{overflow:hidden}
 .od__set:has(input:checked) .od__tick::after{opacity:1;transform:rotate(45deg) scale(1)}
 .od__set:has(input:focus-visible){outline:2px solid var(--do);outline-offset:2px}
 .od__sets .od__err{grid-column:1/-1;margin-top:-4px}
+.od__zp{font-size:.84rem;font-weight:500;line-height:1.35;color:#5A4636}
+.od__zone .od__sn{font-size:.95rem}
 .od__qty{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .od__qty .od__lbl{margin:0}
 .od__step{display:flex;align-items:center;border:1.5px solid rgba(43,26,18,.16);border-radius:999px;background:#fff}
@@ -415,7 +417,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
       <li><strong>Nguồn gốc và hạn dùng</strong>: món ăn nên có nhãn rõ ràng, ghi nơi sản xuất và hạn sử dụng. Mứt Tết của Lành có hạn dùng 1 năm, bảo quản nơi thoáng mát.</li>
       <li><strong>Món người nhận dùng được</strong>: ưu tiên món ăn được, uống được trong mấy ngày Tết, hơn là món chỉ để trưng.</li>
       <li><strong>Bao bì</strong>: giỏ tre, giỏ mây còn dùng được sau Tết. Hạn chế nhựa dùng một lần là cách tử tế với người nhận và với môi trường.</li>
-      <li><strong>Giao hàng và thanh toán</strong>: đặt sớm trước những ngày cao điểm cuối năm, hỏi rõ phí ship, thời gian giao và cách trả tiền. Ở Lành, phí ship ngày thường là 30.000đ nội thành, 50.000đ đi tỉnh; từ 7 ngày trước Tết tăng lên 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh. Bạn thanh toán khi nhận hàng.</li>
+      <li><strong>Giao hàng và thanh toán</strong>: đặt sớm trước những ngày cao điểm cuối năm, hỏi rõ phí ship, thời gian giao và cách trả tiền. Ở Lành, phí ship tính theo đơn (tối đa 2 giỏ mỗi đơn): ngày thường 30.000đ nội thành TP.HCM, 50.000đ đi tỉnh; từ 7 ngày trước Tết tăng lên 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh. Bạn thanh toán khi nhận hàng.</li>
     </ol>
 
     <h2 id="cua-lanh">Giỏ quà Tết của Lành gồm những gì</h2>
@@ -430,7 +432,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
     <div class="row"><a class="btn btn--red" href="https://zalo.me/0976723931" data-order data-src="gio-qua-tet-gom-nhung-gi">Đặt quà Tết</a><a class="btn" href="https://zalo.me/0976723931" target="_blank" rel="noopener">Nhắn Zalo</a></div>
 
     <h2 id="hoi-dap">Câu hỏi thường gặp</h2>
-    <div class="faq"><details><summary>Giỏ quà Tết nên có bao nhiêu món?</summary><p>Không có con số cố định. Quan trọng là các món hợp nhau và người nhận dùng được trong mấy ngày Tết. Set Sum Vầy của Lành có 3 loại mứt; Set Đoàn Viên có 4 loại mứt, trà xanh và bao lì xì.</p></details><details><summary>Nên tặng quà Tết vào lúc nào?</summary><p>Quà Tết thường được trao trong những tuần cuối năm âm lịch, trước giao thừa. Tết Đinh Mùi rơi vào ngày 06/02/2027. Ở Lành, đặt sớm hơn 7 ngày trước Tết thì phí ship thấp hơn và quà kịp đến tay người nhận.</p></details><details><summary>Phí ship và thời gian giao của Lành?</summary><p>Phí ship 30.000đ nội thành (giao trong 4 giờ), 50.000đ đi tỉnh (giao trong 3 ngày). Từ 7 ngày trước Tết và trong Tết, phí ship cao hơn: 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh.</p></details><details><summary>Đặt giỏ quà Tết của Lành thế nào?</summary><p>Bấm Đặt hàng, chọn set và số lượng, điền tên, số điện thoại, địa chỉ. Lành giao tận nơi, bạn thanh toán khi nhận hàng. Đặt hơn 50 giỏ, bạn <a href="https://zalo.me/0976723931" target="_blank" rel="noopener">nhắn Zalo cho Lành</a>.</p></details></div>
+    <div class="faq"><details><summary>Giỏ quà Tết nên có bao nhiêu món?</summary><p>Không có con số cố định. Quan trọng là các món hợp nhau và người nhận dùng được trong mấy ngày Tết. Set Sum Vầy của Lành có 3 loại mứt; Set Đoàn Viên có 4 loại mứt, trà xanh và bao lì xì.</p></details><details><summary>Nên tặng quà Tết vào lúc nào?</summary><p>Quà Tết thường được trao trong những tuần cuối năm âm lịch, trước giao thừa. Tết Đinh Mùi rơi vào ngày 06/02/2027. Ở Lành, đặt sớm hơn 7 ngày trước Tết thì phí ship thấp hơn và quà kịp đến tay người nhận.</p></details><details><summary>Phí ship và thời gian giao của Lành?</summary><p>Phí ship tính theo đơn, mỗi đơn tối đa 2 giỏ: 30.000đ nội thành TP.HCM (giao trong 4 giờ), 50.000đ đi tỉnh (giao trong 3 ngày). Đặt 3 đến 4 giỏ tính hai lần phí ship. Từ 7 ngày trước Tết và trong Tết, phí ship cao hơn: 50.000–100.000đ nội thành TP.HCM, 100.000–150.000đ đi tỉnh; Lành báo phí khi xác nhận đơn.</p></details><details><summary>Đặt giỏ quà Tết của Lành thế nào?</summary><p>Bấm Đặt hàng, chọn set và số lượng, điền tên, số điện thoại, địa chỉ. Lành giao tận nơi, bạn thanh toán khi nhận hàng. Đặt hơn 50 giỏ, bạn <a href="https://zalo.me/0976723931" target="_blank" rel="noopener">nhắn Zalo cho Lành</a>.</p></details></div>
   </div>
 </article>
 </main>
@@ -460,7 +462,13 @@ html.od-lock,html.od-lock body{overflow:hidden}
           </div>
         </div>
         <p class="od__err" id="od-e-qty"></p>
-        <p class="od__ship">Phí ship 30.000đ nội thành (giao trong 4 giờ), 50.000đ đi tỉnh (giao trong 3 ngày). Từ 7 ngày trước Tết và trong Tết: 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh.</p>
+        <fieldset class="od__sets od__zone" aria-describedby="od-e-zone">
+          <legend class="od__lbl">Giao đến</legend>
+          <label class="od__set"><input type="radio" name="zone" value="hcm"><span class="od__sn">Nội thành TP.HCM</span><span class="od__zp" data-zp="hcm">Ship 30.000đ · trong 4 giờ</span><i class="od__tick" aria-hidden="true"></i></label>
+          <label class="od__set"><input type="radio" name="zone" value="tinh"><span class="od__sn">Tỉnh khác</span><span class="od__zp" data-zp="tinh">Ship 50.000đ · trong 3 ngày</span><i class="od__tick" aria-hidden="true"></i></label>
+          <p class="od__err" id="od-e-zone"></p>
+        </fieldset>
+        <p class="od__ship" id="od-ship">Mỗi phí ship cho tối đa 2 giỏ. Từ 7 ngày trước Tết và trong Tết, phí ship là 50.000–100.000đ nội thành TP.HCM, 100.000–150.000đ đi tỉnh, Lành báo khi xác nhận đơn.</p>
         <label class="od__f"><span class="od__lbl">Họ tên người nhận</span><input name="name" autocomplete="name" maxlength="80" enterkeyhint="next" aria-describedby="od-e-name"><span class="od__err" id="od-e-name"></span></label>
         <label class="od__f"><span class="od__lbl">Số điện thoại</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" enterkeyhint="next" aria-describedby="od-e-phone"><span class="od__err" id="od-e-phone"></span></label>
         <label class="od__f"><span class="od__lbl">Địa chỉ nhận hàng</span><textarea name="address" rows="2" autocomplete="street-address" maxlength="300" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" aria-describedby="od-e-address"></textarea><span class="od__err" id="od-e-address"></span></label>
@@ -468,7 +476,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
         <label class="od__hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
       </div>
       <footer class="od__foot">
-        <div class="od__sum"><span>Thành tiền</span><b id="od-total" aria-live="polite">0đ</b><small>Chưa gồm phí ship · trả khi nhận hàng (COD)</small></div>
+        <div class="od__sum"><span>Thành tiền</span><b id="od-total" aria-live="polite">0đ</b><small id="od-sumnote">Chọn nơi giao để cộng phí ship</small></div>
         <button class="od__go" type="submit"><span>Đặt hàng</span></button>
         <p class="od__fail" id="od-fail" role="alert" hidden></p>
         <p class="od__legal">Bấm Đặt hàng là bạn đồng ý để Lành dùng thông tin trên để liên hệ và giao đơn này.</p>
@@ -491,35 +499,44 @@ html.od-lock,html.od-lock body{overflow:hidden}
 const d=document,dlg=d.getElementById('dat-hang');if(!dlg||typeof dlg.showModal!=='function')return;
 const API='https://xxjcbktbbryubrwpiouq.supabase.co/rest/v1/rpc/place_order',KEY='sb_publishable_g7xxvWRnQjGYD20_1R6thw_-ZOpFexm';
 const SETS={'sum-vay':{name:'Set Sum Vầy',price:399000},'doan-vien':{name:'Set Đoàn Viên',price:599000}};
+// Phí ship theo nơi giao, mỗi phí cho tối đa 2 giỏ; máy chủ tính lại (private.ship_fee). Cao điểm Tết: Lành báo phí khi xác nhận.
+const SHIP={hcm:30000,tinh:50000},ZN={hcm:'Nội thành TP.HCM',tinh:'Tỉnh khác'},PEAKZ={hcm:'Ship 50.000–100.000đ',tinh:'Ship 100.000–150.000đ'};
+const PEAK=[Date.parse('2027-01-30T00:00:00+07:00'),Date.parse('2027-02-11T00:00:00+07:00')],peak=()=>{const t=Date.now();return t>=PEAK[0]&&t<PEAK[1]};
 const ZALO='https://zalo.me/0976723931',MEM='lanh-order-v1';
 const form=d.getElementById('od-form'),done=d.getElementById('od-done'),total=d.getElementById('od-total'),fail=d.getElementById('od-fail');
-const qty=d.getElementById('od-qty'),go=form.querySelector('.od__go'),root=d.documentElement;
+const qty=d.getElementById('od-qty'),go=form.querySelector('.od__go'),root=d.documentElement,note=d.getElementById('od-sumnote');
 const vnd=n=>new Intl.NumberFormat('vi-VN').format(n)+'đ';
 let src='',opener=null,busy=false;
 
 const q=()=>{const n=parseInt(String(qty.value).replace(/\D/g,''),10);return isNaN(n)?0:n};
 const setOf=()=>{const r=form.querySelector('input[name=set]:checked');return r?r.value:''};
-function sum(){const s=SETS[setOf()],n=Math.min(50,Math.max(0,q()));total.textContent=vnd(s&&n?s.price*n:0);
+const zoneOf=()=>{const r=form.querySelector('input[name=zone]:checked');return r?r.value:''};
+const shipOf=(n,z)=>peak()||!SHIP[z]?null:Math.ceil(n/2)*SHIP[z];
+function sum(){const s=SETS[setOf()],n=Math.min(50,Math.max(0,q())),z=zoneOf(),goods=s&&n?s.price*n:0,ship=shipOf(n,z);
+  total.textContent=vnd(goods+(goods&&ship?ship:0));
+  note.textContent=!goods?'Chưa gồm phí ship · trả khi nhận hàng':!z?'Chọn nơi giao để cộng phí ship':ship===null?'Chưa gồm phí ship, Lành báo khi xác nhận · trả khi nhận hàng':'Gồm '+vnd(goods)+' quà + '+vnd(ship)+' ship · trả khi nhận hàng';
   form.querySelector('[data-step="-1"]').disabled=n<=1;form.querySelector('[data-step="1"]').disabled=n>=50}
 const phoneOf=v=>{let p=String(v||'').replace(/\D/g,'');if(p.startsWith('84')&&p.length===11)p='0'+p.slice(2);return p};
 
-const ERR={set:'Bạn chọn một set quà nhé.',name:'Bạn nhập họ tên người nhận.',phone:'Số điện thoại di động gồm 10 số, ví dụ 0912 345 678.',address:'Bạn ghi rõ số nhà, đường, phường/xã, tỉnh/thành để Lành giao đúng chỗ.',qty:'Số lượng từ 1 đến 50. Đặt nhiều hơn, bạn nhắn Zalo cho Lành.'};
+const ERR={set:'Bạn chọn một set quà nhé.',zone:'Bạn chọn nơi giao: nội thành TP.HCM hay tỉnh khác.',name:'Bạn nhập họ tên người nhận.',phone:'Số điện thoại di động gồm 10 số, ví dụ 0912 345 678.',address:'Bạn ghi rõ số nhà, đường, phường/xã, tỉnh/thành để Lành giao đúng chỗ.',qty:'Số lượng từ 1 đến 50. Đặt nhiều hơn, bạn nhắn Zalo cho Lành.'};
 function mark(k,msg){const e=d.getElementById('od-e-'+k);if(e)e.textContent=msg||'';
-  const box=k==='set'?form.querySelector('.od__sets'):k==='qty'?form.querySelector('.od__step'):form.elements[k]&&form.elements[k].closest('.od__f');
+  const box=k==='set'?form.querySelector('.od__sets:not(.od__zone)'):k==='zone'?form.querySelector('.od__zone'):k==='qty'?form.querySelector('.od__step'):form.elements[k]&&form.elements[k].closest('.od__f');
   if(box)box.classList.toggle('is-bad',!!msg);if(form.elements[k]&&form.elements[k].setAttribute)form.elements[k].setAttribute('aria-invalid',msg?'true':'false')}
 function check(only){const f=form.elements,bad=[];
-  const t={set:!SETS[setOf()],name:f.name.value.trim().length<2,phone:!/^0[35789]\d{8}$/.test(phoneOf(f.phone.value)),address:f.address.value.trim().length<8,qty:q()<1||q()>50};
+  const t={set:!SETS[setOf()],qty:q()<1||q()>50,zone:!SHIP[zoneOf()],name:f.name.value.trim().length<2,phone:!/^0[35789]\d{8}$/.test(phoneOf(f.phone.value)),address:f.address.value.trim().length<8};
   for(const k in t){if(only&&k!==only)continue;mark(k,t[k]?ERR[k]:'');if(t[k])bad.push(k)}
   return bad}
 
-function remember(){try{const f=form.elements;localStorage.setItem(MEM,JSON.stringify({name:f.name.value.trim(),phone:f.phone.value.trim(),address:f.address.value.trim()}))}catch(e){}}
+function remember(){try{const f=form.elements;localStorage.setItem(MEM,JSON.stringify({name:f.name.value.trim(),phone:f.phone.value.trim(),address:f.address.value.trim(),zone:zoneOf()}))}catch(e){}}
 function recall(){try{const v=JSON.parse(localStorage.getItem(MEM)||'null');if(!v)return;const f=form.elements;
-  ['name','phone','address'].forEach(k=>{if(!f[k].value&&v[k])f[k].value=v[k]})}catch(e){}}
+  ['name','phone','address'].forEach(k=>{if(!f[k].value&&v[k])f[k].value=v[k]});
+  if(!zoneOf()&&SHIP[v.zone]){const r=form.querySelector('input[name=zone][value="'+v.zone+'"]');if(r)r.checked=true}}catch(e){}}
 
 function open(preset,from,el){
   src=from||'';opener=el||d.activeElement;form.hidden=false;done.hidden=true;fail.hidden=true;go.disabled=false;go.classList.remove('is-busy');
   if(preset&&SETS[preset]){const r=form.querySelector('input[name=set][value="'+preset+'"]');if(r)r.checked=true}
-  recall();sum();['set','qty','name','phone','address'].forEach(k=>mark(k,''));
+  if(peak())form.querySelectorAll('[data-zp]').forEach(e=>e.textContent=PEAKZ[e.dataset.zp]);
+  recall();sum();['set','qty','zone','name','phone','address'].forEach(k=>mark(k,''));
   root.classList.add('od-lock');dlg.showModal();
   requestAnimationFrame(()=>requestAnimationFrame(()=>dlg.classList.add('on')));
   // không bật bàn phím ngay trên điện thoại: chọn set trước
@@ -538,32 +555,34 @@ d.addEventListener('click',e=>{let a=e.target.closest('[data-order]');
 dlg.addEventListener('click',e=>{if(e.target.closest('[data-od-close]'))close();else if(e.target===dlg)close()});
 dlg.addEventListener('cancel',e=>{e.preventDefault();if(!busy)close()});
 form.addEventListener('click',e=>{const b=e.target.closest('[data-step]');if(!b)return;const n=Math.min(50,Math.max(1,(q()||1)+(+b.dataset.step)));qty.value=n;sum();mark('qty','')});
-form.addEventListener('change',e=>{if(e.target.name==='set'){mark('set','');sum()}});
+form.addEventListener('change',e=>{if(e.target.name==='set'||e.target.name==='zone'){mark(e.target.name,'');sum()}});
 qty.addEventListener('input',()=>{qty.value=String(qty.value).replace(/\D/g,'').slice(0,2);sum()});
 qty.addEventListener('blur',()=>{qty.value=Math.min(50,Math.max(1,q()||1));sum()});
 ['name','phone','address'].forEach(k=>{const el=form.elements[k];
   el.addEventListener('blur',()=>{if(el.value.trim())check(k)});
   el.addEventListener('input',()=>{if(el.closest('.is-bad'))check(k)})});
 
-const MSG={invalid_phone:['phone',ERR.phone],invalid_name:['name',ERR.name],invalid_address:['address',ERR.address],invalid_set:['set',ERR.set],invalid_qty:['qty',ERR.qty]};
+const MSG={invalid_zone:['zone',ERR.zone],invalid_phone:['phone',ERR.phone],invalid_name:['name',ERR.name],invalid_address:['address',ERR.address],invalid_set:['set',ERR.set],invalid_qty:['qty',ERR.qty]};
 function oops(html){fail.innerHTML=html;fail.hidden=false}
 
 form.addEventListener('submit',async e=>{e.preventDefault();if(busy)return;fail.hidden=true;
-  const bad=check();if(bad.length){const k=bad[0],el=k==='set'?form.querySelector('input[name=set]'):form.elements[k];if(el)el.focus();return}
-  const f=form.elements,s=setOf(),n=q(),body={p_name:f.name.value.trim(),p_phone:phoneOf(f.phone.value),p_address:f.address.value.trim(),p_set:s,p_qty:n,p_note:f.note.value.trim()||null,p_source:src||null,p_hp:f.website.value||null};
+  const bad=check();if(bad.length){const k=bad[0],el=k==='set'||k==='zone'?form.querySelector('input[name='+k+']'):form.elements[k];if(el)el.focus();return}
+  const f=form.elements,s=setOf(),n=q(),body={p_name:f.name.value.trim(),p_phone:phoneOf(f.phone.value),p_address:f.address.value.trim(),p_set:s,p_qty:n,p_note:f.note.value.trim()||null,p_source:src||null,p_hp:f.website.value||null,p_zone:zoneOf()};
   busy=true;go.disabled=true;go.classList.add('is-busy');go.setAttribute('aria-label','Đang gửi đơn');
   const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),15000);
   try{
     const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','apikey':KEY},body:JSON.stringify(body),signal:ac.signal});
     const j=await r.json().catch(()=>null);
     if(!r.ok){const code=j&&j.message||'';const m=MSG[code];
-      if(m){mark(m[0],m[1]);const el=m[0]==='set'?form.querySelector('input[name=set]'):form.elements[m[0]];if(el)el.focus()}
+      if(m){mark(m[0],m[1]);const el=m[0]==='set'||m[0]==='zone'?form.querySelector('input[name='+m[0]+']'):form.elements[m[0]];if(el)el.focus()}
       else if(code==='rate_limited')oops('Lành vừa nhận nhiều đơn từ số này. Bạn đợi ít phút rồi thử lại, hoặc <a href="'+ZALO+'" target="_blank" rel="noopener">nhắn Zalo</a> để Lành ghi đơn giúp.');
       else oops('Chưa gửi được đơn. Bạn thử lại, hoặc <a href="'+ZALO+'" target="_blank" rel="noopener">nhắn Zalo</a> để Lành ghi đơn giúp.');
       return}
     remember();
     d.getElementById('od-code').textContent=j.code;
-    const rows=[['Set',SETS[s].name+' × '+n],['Thành tiền',vnd(j.total||SETS[s].price*n)],['Người nhận',body.p_name],['Điện thoại',body.p_phone.replace(/(\d{4})(\d{3})(\d{3})/,'$1 $2 $3')],['Giao đến',body.p_address]];
+    const goods=j.total||SETS[s].price*n,sf=j.ship_fee;
+    const rows=[['Set',SETS[s].name+' × '+n],['Tiền quà',vnd(goods)],['Phí ship',sf!=null?vnd(sf):'Lành báo khi xác nhận'],['Thu khi nhận',j.cod_total!=null?vnd(j.cod_total):vnd(goods)+' + phí ship'],
+      ['Người nhận',body.p_name],['Điện thoại',body.p_phone.replace(/(\d{4})(\d{3})(\d{3})/,'$1 $2 $3')],['Giao đến',body.p_address+' ('+ZN[body.p_zone]+')']];
     if(body.p_note)rows.push(['Ghi chú',body.p_note]);
     const bill=d.getElementById('od-bill');bill.textContent='';rows.forEach(([a,b])=>{const dt=d.createElement('dt'),dd=d.createElement('dd');dt.textContent=a;dd.textContent=b;bill.append(dt,dd)});
     form.hidden=true;done.hidden=false;done.focus({preventScroll:true});f.note.value='';qty.value=1;form.querySelectorAll('input[name=set]').forEach(r=>r.checked=false);

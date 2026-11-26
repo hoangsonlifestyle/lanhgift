@@ -1,4 +1,4 @@
-// Danh sách đơn (GET) và đổi trạng thái đơn (POST {id, status}). Cần đăng nhập.
+// Danh sách đơn (GET), đổi trạng thái (POST {id, status}) hoặc nhập phí ship (POST {id, ship_fee}). Cần đăng nhập.
 const { env, authed, rpc, noStore } = require('./_lib');
 const STATUS = ['moi', 'da-xac-nhan', 'dang-giao', 'da-giao', 'huy'];
 
@@ -11,9 +11,16 @@ module.exports = async (req, res) => {
       return res.status(200).json({ orders: rows, at: new Date().toISOString() });
     }
     if (req.method === 'POST') {
-      const id = Number(req.body && req.body.id), status = req.body && req.body.status;
-      if (!Number.isInteger(id) || !STATUS.includes(status)) return res.status(400).json({ error: 'bad_input' });
-      const row = await rpc('bo_set_status', { p_key: env('BO_KEY'), p_id: id, p_status: status });
+      const body = req.body || {}, id = Number(body.id);
+      if (!Number.isInteger(id)) return res.status(400).json({ error: 'bad_input' });
+      if ('ship_fee' in body) {
+        const fee = body.ship_fee === null || body.ship_fee === '' ? null : Number(body.ship_fee);
+        if (fee !== null && (!Number.isInteger(fee) || fee < 0 || fee > 2000000)) return res.status(400).json({ error: 'bad_fee' });
+        const row = await rpc('bo_set_ship', { p_key: env('BO_KEY'), p_id: id, p_fee: fee });
+        return res.status(200).json({ order: row });
+      }
+      if (!STATUS.includes(body.status)) return res.status(400).json({ error: 'bad_input' });
+      const row = await rpc('bo_set_status', { p_key: env('BO_KEY'), p_id: id, p_status: body.status });
       return res.status(200).json({ order: row });
     }
     return res.status(405).json({ error: 'method' });
