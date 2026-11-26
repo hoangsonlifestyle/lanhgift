@@ -78,7 +78,7 @@ a{color:inherit}
 .bar__logo svg{display:block;width:100%;height:auto;fill:currentColor}
 .sec{padding:clamp(72px,11vw,150px) var(--gut)}
 .sec h2{font-size:clamp(2rem,4.6vw,3.9rem);max-width:17ch}
-.card{flex:0 0 min(66vw,264px);min-width:0;scroll-snap-align:start;scroll-margin-left:var(--gut);position:relative;background:#FFFDF8;padding:12px 12px 16px;border-radius:6px;box-shadow:0 1px 0 rgba(43,26,18,.08),0 18px 36px -18px rgba(43,26,18,.38);transform:rotate(var(--tilt,0deg));transition:transform .45s var(--out),box-shadow .3s ease-out;transform-style:preserve-3d}
+.card{flex:0 0 min(66vw,264px);min-width:0;scroll-snap-align:start;scroll-margin-left:var(--gut);position:relative;background:#FFFDF8;padding:12px 12px 16px;border-radius:6px;box-shadow:0 1px 0 rgba(43,26,18,.08),0 18px 36px -18px rgba(43,26,18,.38);transform:rotate(var(--tilt,0deg));transition:transform .45s var(--out),box-shadow .3s ease-out}
 .card:nth-child(odd){--tilt:-1.4deg}
 .card:nth-child(even){--tilt:1.1deg}
 .card::after{content:"";position:absolute;inset:0;border-radius:6px;pointer-events:none;background:radial-gradient(circle at var(--gx,50%) var(--gy,30%),rgba(255,255,255,.55),rgba(255,255,255,0) 46%);opacity:0;transition:opacity .3s ease-out}
@@ -187,6 +187,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
 .od__fail{grid-column:1/-1;margin:4px 0 0;padding:10px 12px;border-radius:10px;background:#FBE6DF;color:#7E140D;font-size:.84rem;line-height:1.45}
 .od__fail a{color:inherit;font-weight:700}
 .od__legal{grid-column:1/-1;margin:2px 0 0;font-size:.72rem;line-height:1.45;color:#8A7766}
+.od__ship{margin:0;padding:10px 12px;border-radius:10px;background:#FBF3E4;font-size:.8rem;line-height:1.5;color:#5A4636}
 .od__done{padding:8px 24px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;text-align:center;outline:none}
 .od__ok{width:64px;height:64px;margin:6px auto 12px;display:block}
 .od__ok circle{fill:#FFF0E6;stroke:var(--do);stroke-width:2.5}
@@ -384,7 +385,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
     <p class="eyebrow">Giỏ quà Tết Đinh Mùi 2027</p>
     <h1 id="h1">Giỏ quà Tết Set Đoàn Viên</h1>
     <p class="lede">Phù hợp làm quà Tết cho gia đình, người thân và đối tác.</p>
-    <p class="price"><b>599.000đ</b><span>Giao tận nơi · thanh toán khi nhận hàng</span></p>
+    <p class="price"><b>599.000đ</b><span>Phí ship từ 30.000đ · thanh toán khi nhận hàng</span></p>
     <div class="row"><a class="btn btn--red" href="https://zalo.me/0976723931" data-order="doan-vien" data-src="gio-qua-tet-doan-vien">Đặt set này</a><a class="btn" href="https://zalo.me/0976723931" target="_blank" rel="noopener">Nhắn Zalo</a></div>
     <ul class="ticks"><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>Giỏ tre đan thủ công</li><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>Không nhựa dùng một lần</li><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>Thanh toán khi nhận hàng</li></ul>
   </div>
@@ -411,10 +412,18 @@ html.od-lock,html.od-lock body{overflow:hidden}
   <div class="cmp-wrap" role="region" aria-label="So sánh Set Sum Vầy và Set Đoàn Viên" tabindex="0"><table class="cmp"><caption class="sr">So sánh hai set quà Tết 2027 của Lành</caption><thead><tr><th scope="col"><span class="sr">Mục</span></th><th scope="col"><a href="/gio-qua-tet-sum-vay">Set Sum Vầy</a></th><th scope="col" class="is-me">Set Đoàn Viên</th></tr></thead><tbody><tr><th scope="row">Giá</th><td><span class="p">399.000đ</span></td><td class="is-me"><span class="p">599.000đ</span></td></tr><tr><th scope="row">Mứt Tết</th><td>3 loại, hũ 250g</td><td class="is-me">4 loại, hũ 500g</td></tr><tr><th scope="row">Các loại mứt</th><td>Nho vàng Ấn Độ, kiwi Đà Lạt, táo tàu đen</td><td class="is-me">Nho vàng Ấn Độ, kiwi Đà Lạt, táo tàu đen, xí muội mix</td></tr><tr><th scope="row">Trà xanh cao cấp</th><td><span class="no">Không có</span></td><td class="is-me">01 phần</td></tr><tr><th scope="row">Bao lì xì Xuân Ánh Nguyệt</th><td><span class="no">Không có</span></td><td class="is-me">01 set</td></tr><tr><th scope="row">Giỏ tre đan thủ công</th><td>Có</td><td class="is-me">Có</td></tr><tr><th scope="row">Gói quà Lành Gift</th><td>Có</td><td class="is-me">Có</td></tr><tr><th scope="row">Phù hợp tặng</th><td>Bạn bè, đồng nghiệp</td><td class="is-me">Gia đình, người thân, đối tác</td></tr></tbody></table></div>
 </section>
 
-<section class="blk" aria-labelledby="h-hoi">
+<section class="blk" aria-labelledby="h-giao">
+  <div class="two">
+    <div><p class="eyebrow">Giao hàng</p><h2 id="h-giao">Giao hàng và bảo quản</h2>
+      <p class="intro">Tết Đinh Mùi rơi vào ngày 06/02/2027. Đặt sớm để quà đến kịp và phí ship nhẹ hơn.</p></div>
+    <ul class="rows"><li><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg><strong>Giao nội thành</strong><span>Phí ship 30.000đ, giao trong 4 giờ</span></li><li><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg><strong>Giao đi tỉnh</strong><span>Phí ship 50.000đ, giao trong 3 ngày</span></li><li><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg><strong>7 ngày trước Tết và trong Tết</strong><span>Phí ship 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh. Nên đặt sớm.</span></li><li><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg><strong>Hạn dùng và bảo quản</strong><span>Mứt dùng trong 1 năm. Bảo quản nơi thoáng mát.</span></li><li><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg><strong>Thanh toán</strong><span>Khi nhận hàng (COD): tiền quà cộng phí ship</span></li></ul>
+  </div>
+</section>
+
+<section class="blk blk--alt" aria-labelledby="h-hoi">
   <p class="eyebrow">Đặt hàng</p>
   <h2 id="h-hoi">Câu hỏi thường gặp</h2>
-  <div class="faq"><details><summary>Thanh toán thế nào?</summary><p>Bạn thanh toán khi nhận hàng (COD). Đặt trên trang không cần chuyển khoản trước.</p></details><details><summary>Lành giao ở đâu?</summary><p>Lành giao tận nơi, và vận chuyển quà đến các tỉnh thành trên cả nước.</p></details><details><summary>Đặt nhiều giỏ, hoặc cần in logo công ty?</summary><p>Mỗi đơn trên trang đặt được đến 50 giỏ. Cần nhiều hơn, hoặc cần in logo công ty lên hộp, bạn <a href="https://zalo.me/0976723931" target="_blank" rel="noopener">nhắn Zalo cho Lành</a> hoặc xem <a href="/qua-tet-doanh-nghiep">quà Tết doanh nghiệp</a>.</p></details><details><summary>Muốn đổi thông tin sau khi đặt?</summary><p>Sau khi đặt, trang hiện mã đơn. Bạn <a href="https://zalo.me/0976723931" target="_blank" rel="noopener">nhắn Zalo cho Lành</a> kèm mã đơn để đổi thông tin.</p></details></div>
+  <div class="faq"><details><summary>Phí ship bao nhiêu?</summary><p>Phí ship 30.000đ nội thành (giao trong 4 giờ), 50.000đ đi tỉnh (giao trong 3 ngày). Từ 7 ngày trước Tết và trong Tết, phí ship cao hơn: 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh.</p></details><details><summary>Thanh toán thế nào?</summary><p>Bạn thanh toán khi nhận hàng (COD), gồm tiền quà và phí ship. Đặt trên trang không cần chuyển khoản trước.</p></details><details><summary>Lành giao ở đâu, bao lâu thì tới?</summary><p>Lành giao tận nơi trong nội thành và đi các tỉnh thành trên cả nước. Nội thành giao trong 4 giờ, đi tỉnh trong 3 ngày.</p></details><details><summary>Mứt để được bao lâu?</summary><p>Hạn dùng 1 năm. Bảo quản nơi thoáng mát.</p></details><details><summary>Đặt nhiều giỏ, hoặc cần in logo công ty?</summary><p>Mỗi đơn trên trang đặt được đến 50 giỏ. Đơn doanh nghiệp từ 20 set, có xuất hoá đơn VAT. Cần in logo công ty lên hộp, bạn <a href="https://zalo.me/0976723931" target="_blank" rel="noopener">nhắn Zalo cho Lành</a> hoặc xem <a href="/qua-tet-doanh-nghiep">quà Tết doanh nghiệp</a>.</p></details><details><summary>Muốn đổi thông tin sau khi đặt?</summary><p>Sau khi đặt, trang hiện mã đơn. Bạn <a href="https://zalo.me/0976723931" target="_blank" rel="noopener">nhắn Zalo cho Lành</a> kèm mã đơn để đổi thông tin.</p></details></div>
   <div class="tiles"><a class="tile" href="/gio-qua-tet-sum-vay"><img src="/anh/gio-qua-tet-sum-vay.jpg" width="84" height="84" loading="lazy" decoding="async" alt=""><span><b>Set Sum Vầy · 399.000đ</b><small>3 hũ mứt Tết 250g, giỏ tre đan thủ công</small></span><i aria-hidden="true">→</i></a><a class="tile" href="/qua-tet-doanh-nghiep"><span class="tile__ic"><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg></span><span><b>Quà Tết doanh nghiệp</b><small>In logo lên hộp, giao toàn quốc</small></span><i aria-hidden="true">→</i></a><a class="tile" href="/gio-qua-tet-gom-nhung-gi"><span class="tile__ic"><svg viewBox="-25 -25 50 50" aria-hidden="true" focusable="false"><use href="#mai"/></svg></span><span><b>Giỏ quà Tết gồm những gì?</b><small>Cách chọn quà theo người nhận</small></span><i aria-hidden="true">→</i></a></div>
 </section>
 </main>
@@ -445,6 +454,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
           </div>
         </div>
         <p class="od__err" id="od-e-qty"></p>
+        <p class="od__ship">Phí ship 30.000đ nội thành (giao trong 4 giờ), 50.000đ đi tỉnh (giao trong 3 ngày). Từ 7 ngày trước Tết và trong Tết: 50.000–100.000đ nội thành, 100.000–150.000đ đi tỉnh.</p>
         <label class="od__f"><span class="od__lbl">Họ tên người nhận</span><input name="name" autocomplete="name" maxlength="80" enterkeyhint="next" aria-describedby="od-e-name"><span class="od__err" id="od-e-name"></span></label>
         <label class="od__f"><span class="od__lbl">Số điện thoại</span><input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" enterkeyhint="next" aria-describedby="od-e-phone"><span class="od__err" id="od-e-phone"></span></label>
         <label class="od__f"><span class="od__lbl">Địa chỉ nhận hàng</span><textarea name="address" rows="2" autocomplete="street-address" maxlength="300" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" aria-describedby="od-e-address"></textarea><span class="od__err" id="od-e-address"></span></label>
@@ -452,7 +462,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
         <label class="od__hp" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
       </div>
       <footer class="od__foot">
-        <div class="od__sum"><span>Thành tiền</span><b id="od-total" aria-live="polite">0đ</b><small>Thanh toán khi nhận hàng (COD)</small></div>
+        <div class="od__sum"><span>Thành tiền</span><b id="od-total" aria-live="polite">0đ</b><small>Chưa gồm phí ship · trả khi nhận hàng (COD)</small></div>
         <button class="od__go" type="submit"><span>Đặt hàng</span></button>
         <p class="od__fail" id="od-fail" role="alert" hidden></p>
         <p class="od__legal">Bấm Đặt hàng là bạn đồng ý để Lành dùng thông tin trên để liên hệ và giao đơn này.</p>
@@ -463,7 +473,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
       <h3 class="od__ttl">Lành đã nhận đơn</h3>
       <p class="od__code">Mã đơn <b id="od-code"></b></p>
       <dl class="od__bill" id="od-bill"></dl>
-      <p class="od__note">Thanh toán khi nhận hàng (COD). Cần đổi thông tin đơn, bạn nhắn Zalo cho Lành kèm mã đơn.</p>
+      <p class="od__note">Thanh toán khi nhận hàng (COD): tiền quà cộng phí ship. Cần đổi thông tin đơn, bạn nhắn Zalo cho Lành kèm mã đơn.</p>
       <div class="od__acts"><button class="od__go" type="button" data-od-close><span>Xong</span></button><a class="od__alt" href="https://zalo.me/0976723931" target="_blank" rel="noopener">Nhắn Zalo cho Lành</a></div>
     </div>
   </div>
@@ -513,7 +523,12 @@ function close(){if(!dlg.open)return;dlg.classList.remove('on');
   const card=dlg.querySelector('.od__card'),fin=()=>{card.removeEventListener('transitionend',fin);clearTimeout(tm);if(dlg.open)dlg.close();root.classList.remove('od-lock');if(opener&&opener.focus)opener.focus({preventScroll:true})};
   const tm=setTimeout(fin,matchMedia('(prefers-reduced-motion:reduce)').matches?10:560);card.addEventListener('transitionend',fin)}
 
-d.addEventListener('click',e=>{const a=e.target.closest('[data-order]');if(!a)return;e.preventDefault();open(a.dataset.order,a.dataset.src,a)});
+// Nút nằm trong thẻ nghiêng 3D: nhấn xuống trúng nút nhưng nhả ra có thể bị tính vào khung bao ngoài.
+// Nhớ nút vừa nhấn; nếu cú bấm rơi vào phần tử chứa nút đó, tay gần như không xê dịch và trong 1 giây, vẫn coi là bấm nút.
+let pd=null;d.addEventListener('pointerdown',e=>{const a=e.target.closest('[data-order]');pd=a?{a,x:e.clientX,y:e.clientY,t:Date.now()}:null},true);
+d.addEventListener('click',e=>{let a=e.target.closest('[data-order]');
+  if(!a&&pd&&Date.now()-pd.t<1000&&Math.hypot(e.clientX-pd.x,e.clientY-pd.y)<12&&e.target.contains(pd.a))a=pd.a;
+  pd=null;if(!a)return;e.preventDefault();open(a.dataset.order,a.dataset.src,a)});
 dlg.addEventListener('click',e=>{if(e.target.closest('[data-od-close]'))close();else if(e.target===dlg)close()});
 dlg.addEventListener('cancel',e=>{e.preventDefault();if(!busy)close()});
 form.addEventListener('click',e=>{const b=e.target.closest('[data-step]');if(!b)return;const n=Math.min(50,Math.max(1,(q()||1)+(+b.dataset.step)));qty.value=n;sum();mark('qty','')});
