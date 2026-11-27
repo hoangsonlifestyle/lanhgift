@@ -575,6 +575,7 @@ function campSheet(id){
       <div class="fl"><span>Trạng thái</span>${seg('status',c.status,CS)}<span class="xs">Đã quyết toán: khoá sổ chiến dịch, không sửa đơn và chi được nữa. Mở lại bằng cách chọn trạng thái khác.</span></div>
       <div class="two"><label class="fl"><span>Bắt đầu bán</span><input class="in" type="date" name="start_date" value="${esc(c.start_date||'')}"></label><label class="fl"><span>Kết thúc</span><input class="in" type="date" name="end_date" value="${esc(c.end_date||'')}"></label></div>
       <label class="fl"><span>Mục tiêu doanh thu</span>${moneyIn('target_revenue',c.target_revenue,'VD 60tr')}</label>
+      <div class="note"><span>${P(I.info,18)}</span><span>Vốn chiến dịch cấp ở Sơn Nga Family (nút Thêm vốn), không nhập ở đây. Khi có giai đoạn 2, bạn gửi yêu cầu cấp vốn ngay tại Lành.</span></div>
       <div class="fl"><span>Set quà <small>tên · giá · số chuẩn bị</small></span><div class="lst" data-sets>${(c.sets||[]).map(setRow).join('')}</div>
         <button type="button" class="b b--o b--sm" data-addset style="align-self:flex-start">${P(I.plus,16)}Thêm set</button><span class="xs">Giá hai set trên web cố định theo trang web; muốn đổi giá web, nhắn Claude sửa cả trang và máy chủ.</span></div>
       <div class="fl"><span>Ngân sách chi</span><div class="two">${CATS.map(([k,t])=>`<label class="fl"><span>${t}</span>${moneyIn('b_'+k,(c.budget||{})[k],'0')}</label>`).join('')}</div></div>
