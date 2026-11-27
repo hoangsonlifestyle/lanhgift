@@ -1,4 +1,5 @@
-/* Dashboard Lành, giai đoạn 1: chiến dịch, đơn từ mọi nguồn, đối soát kế hoạch và thực nhận, chi phí.
+/* Dashboard Lành: chiến dịch, đơn từ mọi nguồn, đối soát kế hoạch và thực nhận, chi phí.
+   2B (27/11/2026): nối Sơn Nga Family: vốn và tài khoản, xin vốn, chặn chi khi thiếu vốn, Tiền khách về, Phí ship trả bằng, trạng thái đồng bộ.
    Dữ liệu qua /api/bo (Supabase bo2_*). Thêm ?demo=1 để xem bằng số liệu minh hoạ, không gọi máy chủ. */
 (()=>{'use strict';
 const $=id=>document.getElementById(id);
@@ -41,11 +42,23 @@ const PEAK=[Date.parse('2027-01-30T00:00:00+07:00'),Date.parse('2027-02-11T00:00
 const CARRIERS=['Ahamove','Grab','Lalamove','GHTK','GHN','Viettel Post','Bưu điện','Tự giao'];
 const COLORS=['#B5281C','#D9A441','#1F5A40','#1E4A7A','#F28C1E','#8E1B12','#7A6656','#5E8C6A','#C9826B','#3E6E8E','#A88B5A','#4A3628'];
 const DONE=s=>s==='da-nhan-tien'||s==='hoan-hang';
+/* 2B: nối Sơn Nga Family. Vốn vào TK KINH DOANH LÀNH do Sơn Nga ghi (sn_capital); Lành tự trừ chi đã trả và phí ship trả từ tài khoản này. */
+const SN_URL='https://sonngafamily.com/kinh-doanh-dau-tu?mang=lanh-gift';
+const linked=c=>!!(c&&c.sn_id);
+const shipBy=o=>{const k=o.ship_cost||0;if(k<=0)return 'none';if(o.status==='hoan-hang')return 'tk-kd';const b=o.ship_paid_by||(o.pay_method==='cod'?'tru-cod':'tk-kd');return b==='tru-cod'&&(o.got_amount||0)>=k?'tru-cod':'tk-kd'};
+const thuOf=o=>Math.max(0,(o.got_amount||0)-(shipBy(o)==='tru-cod'?o.ship_cost||0:0));
+const kdOut=c=>sum(D.expenses.filter(e=>e.campaign_id===c.id&&e.paid),e=>e.amount)+sum(D.orders.filter(o=>o.campaign_id===c.id&&DONE(o.status)&&shipBy(o)==='tk-kd'),o=>o.ship_cost);
+const capLeft=c=>linked(c)&&c.sn_capital!=null?c.sn_capital-kdOut(c):null;
+const pendReq=c=>D.capital_requests.find(r=>r.campaign_id===c.id&&r.status==='cho-duyet')||null;
+const MTO=[['hkd','TK HỘ KINH DOANH'],['rieng','Ví riêng Sơn']],SBY=[['tru-cod','Hãng trừ vào COD'],['tk-kd','TK KINH DOANH LÀNH']];
+const RQS={'cho-duyet':'Chờ Sơn Nga duyệt','da-duyet':'Đã duyệt','tu-choi':'Từ chối','huy':'Đã huỷ'};
 const ERR={invalid_items:'Chọn ít nhất một set, số lượng từ 1.',invalid_name:'Tên cần từ 2 ký tự.',invalid_phone:'Số điện thoại chưa đúng.',invalid_address:'Địa chỉ chưa đúng.',
   invalid_money:'Số tiền chưa đúng, ví dụ 30000 hoặc 30k.',invalid_amount:'Nhập số tiền chi.',invalid_campaign:'Chưa có chiến dịch đang bán. Tạo hoặc mở một chiến dịch trước.',
   invalid_date:'Ngày chưa đúng.',plan_locked:'Đơn đã đối soát nên kế hoạch đã khoá. Đưa đơn về Đã giao rồi sửa.',locked:'Chiến dịch đã quyết toán, sổ đã khoá.',
   code_taken:'Tên chiến dịch này đã có, đổi tên khác.',invalid_sets:'Danh sách set chưa đúng.',invalid_budget:'Ngân sách chưa đúng.',invalid_channel:'Nguồn đơn chưa đúng.',
-  invalid_source:'Tên nguồn chưa đúng.',invalid_status:'Trạng thái chưa đúng.',upstream:'Máy chủ đang bận, thử lại.',bad_input:'Dữ liệu chưa đúng.',not_found:'Không còn dòng này, tải lại trang.'};
+  invalid_source:'Tên nguồn chưa đúng.',invalid_status:'Trạng thái chưa đúng.',upstream:'Máy chủ đang bận, thử lại.',bad_input:'Dữ liệu chưa đúng.',not_found:'Không còn dòng này, tải lại trang.',
+  no_capital:'TK KINH DOANH LÀNH không đủ vốn cho khoản này. Lưu Chưa trả rồi xin thêm vốn.',sn_controls:'Chiến dịch đã nối Sơn Nga Family: quyết toán, mở lại, đổi mã làm ở Sơn Nga.',
+  wait_capital:'Chiến dịch đang chờ Sơn Nga duyệt vốn, chưa mở bán được.',invalid_money_to:'Chọn tài khoản tiền khách về.',invalid_ship_by:'Chọn cách trả phí ship.'};
 const errText=e=>e&&e.message==='login'?'':ERR[e&&e.message]||'Chưa lưu được, thử lại.';
 
 const P=(d,s=20)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -54,7 +67,7 @@ const I={gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M5 13v8h
   check:'<path d="M5 12l5 5 9-10"/>',info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>'};
 
 const DEMO=new URLSearchParams(location.search).has('demo');
-let D={campaigns:[],sources:[],orders:[],expenses:[]};
+let D={campaigns:[],sources:[],orders:[],expenses:[],capital_requests:[],sync_items:[],sync_runs:[]};
 const S={tab:'tong-quan',camp:null,f:'can',q:'',src:'all'};
 let seen=new Set(),first=true,timer=0,audio=null,DB=null;
 
@@ -66,7 +79,7 @@ async function api(method,body){
   const r=await fetch('/api/bo',{method,credentials:'same-origin',headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});
   if(r.status===401){showLogin();throw new Error('login')}
   const j=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(j.error||'upstream');
+  if(!r.ok){const er=new Error(j.error||'upstream');er.data=j;throw er}
   return j;
 }
 function upsert(list,row){const i=list.findIndex(x=>x.id===row.id);if(i>=0)list[i]=row;else list.unshift(row);return row}
@@ -77,13 +90,15 @@ async function save(action,id,data){
   else if(action==='campaign'){upsert(D.campaigns,j.row);D.campaigns.sort((a,b)=>a.id-b.id)}
   else if(action==='expense-delete')D.expenses=D.expenses.filter(e=>e.id!==j.id);
   else if(action==='sources')D.sources=j.sources;
+  else if(action==='capreq'){upsert(D.capital_requests,j.row);D.capital_requests.sort((a,b)=>b.id-a.id)}
+  else if(action==='capreq-cancel'){const r=D.capital_requests.find(x=>x.id===j.id);if(r)r.status='huy'}
   render();
   return j.row||j;
 }
 async function load(){
   try{
     const j=await api('GET');
-    D={campaigns:j.campaigns||[],sources:j.sources||[],orders:j.orders||[],expenses:j.expenses||[]};
+    D={campaigns:j.campaigns||[],sources:j.sources||[],orders:j.orders||[],expenses:j.expenses||[],capital_requests:j.capital_requests||[],sync_items:j.sync_items||[],sync_runs:j.sync_runs||[]};
     const fresh=D.orders.filter(o=>!seen.has(o.id));
     if(!first&&fresh.length){const web=fresh.filter(o=>o.origin==='web');if(web.length)alertNew(web)}
     fresh.forEach(o=>{o._new=!first;seen.add(o.id)});first=false;
@@ -318,6 +333,7 @@ function rCampaigns(c){
   const tot=rows.filter(r=>r.x.status!=='draft');
   return `${run.length>1?`<div class="note"><span>${P(I.alert,18)}</span><span>Có ${run.length} chiến dịch Đang bán. Đơn web mới vào chiến dịch bắt đầu muộn nhất: <b>${esc((D.campaigns.find(x=>x.id===runningId())||{}).name)}</b>.</span></div>`:''}
   ${!run.length&&D.campaigns.length?`<div class="note note--do"><span>${P(I.alert,18)}</span><span>Không có chiến dịch Đang bán: đơn web mới sẽ chưa gắn chiến dịch.</span></div>`:''}
+  ${capCard(c)}${syncCard(c)}
   <section class="cd"><div class="hd"><h3>Báo cáo theo chiến dịch</h3><button type="button" class="b b--do b--sm" data-act="new-camp">${P(I.plus,16)}Tạo chiến dịch</button></div>
   ${rows.length?`<div class="lst ph">${rows.map(({x,v})=>`<button type="button" class="lr" data-camp="${x.id}"><span class="grow"><b style="display:block;font-size:14px">${esc(x.name)}</b><span class="xs">${CSN[x.status]} · ${v.live.length} đơn · doanh thu ${tr(v.revenue)} · chi ${tr(v.cost)}</span></span><span style="text-align:right"><b class="num ${dcls(v.profit)}" style="display:block">${tr(v.profit)}</b><span class="xs">${x.status==='settled'?'lãi':'lãi tạm tính'}</span></span></button>`).join('')}</div><div class="scroll pc"><table class="tb"><thead><tr><th>Chiến dịch</th><th>Đơn</th><th>Doanh thu</th><th>Thực nhận</th><th>Chi phí</th><th>Lãi</th></tr></thead><tbody>
   ${rows.map(({x,v})=>`<tr data-camp="${x.id}"><td><b>${esc(x.name)}</b> <span class="tg cs-${x.status}">${CSN[x.status]}</span><small>${fd(x.start_date)} → ${fd(x.end_date)}</small></td><td>${v.live.length}</td><td>${tr(v.revenue)}</td><td>${tr(v.aNet)}</td><td>${tr(v.cost)}</td><td class="${dcls(v.profit)}"><b>${tr(v.profit)}</b>${x.status!=='settled'?'<small>tạm tính</small>':''}</td></tr>`).join('')}
@@ -329,9 +345,84 @@ function rCampaigns(c){
     <dt>Set quà</dt><dd>${(c.sets||[]).map(s=>esc(s.name)+' '+vnd(s.price)+(s.qty?' · '+s.qty+' cái':'')).join('<br>')||'Chưa có'}</dd></dl></section>`:''}
   <section class="cd"><div class="hd"><h3>Nguồn đơn</h3><button type="button" class="b b--o b--sm" data-act="sources">Sửa danh sách</button></div>
     <div class="chips">${D.sources.filter(s=>s.active).map(s=>`<span class="tg tg--src">${esc(s.label)}${s.auto?' · tự gắn':''}</span>`).join('')}</div>
-    <p class="xs">Web, Google, Google Ads, Facebook, Zalo, Instagram, TikTok được nhận ra tự động khi khách đặt trên web. Mọi nguồn đều chọn được khi ghi đơn tay.</p></section>
-  <section class="cd"><div class="hd"><h3>Đồng bộ sang Sơn Nga Family</h3><span class="tg">Giai đoạn 2 · chưa bật</span></div>
-    <p class="s">Khi bật: chỉ đơn đã nhận tiền và khoản chi đã trả mới sang, mỗi dòng mang mã gốc để không ghi trùng, có xem trước và nhật ký. Vốn, quyết toán, chuyển lãi vẫn làm ở Sơn Nga.</p></section>`;
+    <p class="xs">Web, Google, Google Ads, Facebook, Zalo, Instagram, TikTok được nhận ra tự động khi khách đặt trên web. Mọi nguồn đều chọn được khi ghi đơn tay.</p></section>`;
+}
+
+/* --- 2B: Vốn và tài khoản, yêu cầu cấp vốn, đồng bộ với Sơn Nga (bản vẽ "Lành ↔ Sơn Nga · đồng bộ (2B)", Sơn duyệt 27/11/2026) --- */
+function reqRow(r){
+  const m=ymd(dayKey(r.created_at)),dec=r.status==='da-duyet'&&r.decided_amount!=null&&r.decided_amount!==r.amount;
+  return `<div class="lr lr--req"><span class="dt"><b>${m?m[3]:''}</b><small>Th${m?+m[2]:''}</small></span><span class="grow"><b style="display:block;font-size:14px">${r.kind==='tao'?'Vốn mở chiến dịch':'Xin thêm'} ${tr(r.amount)}${dec?' · được duyệt '+tr(r.decided_amount):''}</b>
+    <span class="xs">${esc(r.reply?'Sơn Nga ghi: '+r.reply:r.note||'')}${r.status==='cho-duyet'?(r.note?' · ':'')+'gửi '+ft(r.created_at):''}</span></span>
+    <span class="tg rq-${r.status}">${RQS[r.status]||r.status}</span>${r.status==='cho-duyet'?`<button type="button" class="b b--o b--sm" data-capcancel="${r.id}">Huỷ yêu cầu</button>`:''}</div>`;
+}
+function capCard(c){
+  if(!c)return '';
+  const reqs=D.capital_requests.filter(r=>r.campaign_id===c.id).slice(0,6),pend=pendReq(c),live=c.status!=='settled';
+  const list=reqs.length?`<div class="fl"><span class="cap">Yêu cầu cấp vốn</span><div class="lst">${reqs.map(reqRow).join('')}</div></div>`:'';
+  if(!linked(c))return `<section class="cd"><div class="hd"><div><h3>Vốn và tài khoản</h3><p class="s">Chưa nối Sơn Nga Family. ${pend?'Đang chờ Sơn Nga duyệt vốn.':'Gửi yêu cầu cấp vốn: Sơn Nga duyệt thì tạo chiến dịch bên đó, ghi vốn và nối hai bên.'}</p></div>
+    ${live?`<button type="button" class="b b--do" data-act="capreq">${pend?'Sửa yêu cầu vốn':'Xin vốn'}</button>`:''}</div>${list}</section>`;
+  const v=view(c),left=capLeft(c),out=kdOut(c),hk=v.done.filter(o=>(o.money_to||'hkd')==='hkd'),rieng=v.done.filter(o=>o.money_to==='rieng'),unpaid=v.ex.filter(e=>!e.paid);
+  const low=left!=null&&left<Math.max(1000000,(c.sn_capital||0)*0.1);
+  return `<section class="cd"><div class="hd"><div><h3>Vốn và tài khoản</h3><p class="s">Vốn theo sổ Sơn Nga Family${c.sn_synced_at?', đồng bộ lúc '+ft(c.sn_synced_at):''} · còn lại tính theo chi đã trả ở Lành</p></div>
+    <div class="acts">${live?`<button type="button" class="b b--do" data-act="capreq">${pend?'Sửa yêu cầu vốn':'Xin thêm vốn'}</button>`:''}<a class="b b--o" href="${SN_URL}" target="_blank" rel="noopener">Mở Sơn Nga Family</a></div></div>
+    <div class="k4">
+      <div class="tl"><span class="cap">Vốn đã cấp</span><b>${tr(c.sn_capital||0)}</b><span class="xs">ghi ở Sơn Nga Family</span></div>
+      <div class="tl${low?' tl--kim':''}"><span class="cap">Còn trong TK KINH DOANH LÀNH</span><b>${tr(left)}</b><span class="xs">vốn − chi đã trả ${tr(out)}${low?' · sắp hết':''}</span></div>
+      <div class="tl tl--la"><span class="cap">Đã về TK HỘ KINH DOANH</span><b>${tr(sum(hk,thuOf))}</b><span class="xs">${hk.length} đơn đã nhận tiền</span></div>
+      <div class="tl${unpaid.length?' tl--do':''}"><span class="cap">Chi chưa trả</span><b>${tr(sum(unpaid,e=>e.amount))}</b><span class="xs">${unpaid.length?unpaid.length+' khoản · chờ vốn':'không có'}</span></div>
+    </div>
+    ${rieng.length?`<div class="note"><span>${P(I.alert,18)}</span><span>${rieng.length} đơn tiền về Ví riêng Sơn (${tr(sum(rieng,thuOf))}). Chuyển sang TK HỘ KINH DOANH rồi sửa ô Tiền khách về trước khi quyết toán.</span></div>`:''}
+    ${list}</section>`;
+}
+function syncCard(c){
+  if(!linked(c))return '';
+  const v=view(c),by=new Map(D.sync_items.map(i=>[i.ref,i]));
+  const want=[...v.done.map(o=>'O:'+o.code),...v.ex.filter(e=>e.paid).map(e=>'E:'+e.id)],ws=new Set(want);
+  const ok=want.filter(r=>by.has(r)&&by.get(r).state==='ok'),nO=ok.filter(r=>r[0]==='O').length;
+  const fresh=want.filter(r=>!by.has(r)),gone=D.sync_items.filter(i=>i.campaign_id===c.id&&!ws.has(i.ref));
+  const bad=D.sync_items.filter(i=>i.campaign_id===c.id&&i.state!=='ok'&&ws.has(i.ref)),run=D.sync_runs[0];
+  const nameOf=ref=>{if(ref[0]==='O'){const o=D.orders.find(x=>x.code===ref.slice(2));return o?{t:'Đơn '+o.code+' · '+vnd(thuOf(o)),a:`data-open="${o.id}"`,b:'Mở đơn'}:{t:'Đơn '+ref.slice(2)}}
+    const e=D.expenses.find(x=>x.id===+ref.slice(2));return e?{t:'Chi · '+e.name+' · '+tr(e.amount),a:`data-exp="${e.id}"`,b:'Mở khoản chi'}:{t:'Khoản chi '+ref.slice(2)}};
+  return `<section class="cd"><div class="hd"><div><h3>Đồng bộ với Sơn Nga Family</h3><p class="s">${run?'Lần gần nhất '+ft(run.at):'Chưa đồng bộ lần nào'} · Sơn Nga đọc khi mở tab Lành Gift, khi bấm Đồng bộ và mỗi sáng 8:00</p></div><span class="tg tg--la">Đang nối</span></div>
+    <div class="k3">
+      <div class="tl tl--la"><span class="cap">Đã sang Sơn Nga</span><b>${ok.length} mục</b><span class="xs">${nO} đơn · ${ok.length-nO} khoản chi</span></div>
+      <div class="tl"><span class="cap">Chờ lần đồng bộ sau</span><b>${fresh.length+gone.length} mục</b><span class="xs">${fresh.length} mới${gone.length?' · '+gone.length+' huỷ, Sơn Nga sẽ xoá dòng':''}</span></div>
+      <div class="tl${bad.length?' tl--do':''}"><span class="cap">Cần xử lý</span><b>${bad.length} việc</b><span class="xs">${bad.length?'xem bên dưới':'không có'}</span></div>
+    </div>
+    ${bad.length?`<div class="lst">${bad.map(i=>{const n=nameOf(i.ref);return `<div class="lr ${i.state==='cho-von'?'lr--do':'lr--kim'}"><span class="grow"><b style="display:block;font-size:14px">${esc(n.t)}</b><span class="xs">${i.state==='cho-von'?'Chờ vốn':'Chưa ghi được'}${i.message?': '+esc(i.message):''}</span></span>${n.a?`<button type="button" class="b b--o b--sm" ${n.a}>${n.b}</button>`:''}</div>`}).join('')}</div>`:''}
+    <p class="xs" style="margin:0;padding:12px 14px;border-radius:14px;background:var(--kem2);line-height:1.5">Chỉ đơn <b>Đã nhận tiền</b> (và đơn hoàn hàng) cùng khoản chi <b>Đã trả</b> mới sang Sơn Nga, mỗi dòng mang mã đơn hoặc mã khoản chi. Sửa ở Lành thì dòng bên Sơn Nga sửa theo; huỷ đơn, xoá chi thì dòng bên Sơn Nga được xoá, tiền về lại đúng tài khoản. Vốn, quyết toán làm ở Sơn Nga; quyết toán xong chiến dịch ở Lành tự khoá sổ.</p></section>`;
+}
+function capSheet(c,pre){
+  pre=pre||{};
+  const pend=pendReq(c),v=view(c),left=capLeft(c),unpaid=v.ex.filter(e=>!e.paid),lk=linked(c);
+  const short=lk?Math.max(0,sum(unpaid,e=>e.amount)-Math.max(0,left||0)):0;
+  const amt=pre.amount||(pend?pend.amount:short||null);
+  const sel=new Set(pre.expense_ids||(pend?pend.expense_ids||[]:unpaid.map(e=>e.id)));
+  const chips=[short?[short,'Đúng số thiếu '+tr(short)]:null,[5e6,'5 tr'],[10e6,'10 tr'],[20e6,'20 tr']].filter(Boolean);
+  openSheet({key:'capreq-'+c.id,title:pend?'Sửa yêu cầu vốn':lk?'Xin thêm vốn':'Xin vốn',sub:esc(c.name)+' · gửi Sơn Nga Family duyệt',
+    body:`${lk?`<div class="box box--be"><div class="kvr"><span>Vốn đã cấp</span><b>${tr(c.sn_capital||0)}</b></div><div class="kvr"><span>Chi đã trả</span><b>${tr(kdOut(c))}</b></div>
+        <div class="kvr"><span>Còn trong TK KINH DOANH LÀNH</span><b>${tr(left)}</b></div>${unpaid.length?`<div class="kvr kvr--do"><span>Chi chưa trả</span><b>${tr(sum(unpaid,e=>e.amount))}</b></div>`:''}</div>`
+      :`<div class="note"><span>${P(I.info,18)}</span><span>Chiến dịch chưa nối Sơn Nga. Sơn Nga duyệt thì tạo chiến dịch bên đó, ghi vốn và nối hai bên${c.status==='draft'?'; lúc đó mới mở bán được':''}.</span></div>`}
+      <label class="fl"><span>Số tiền xin${lk?' thêm':''}</span>${moneyIn('amount',amt,'VD 5tr',' data-autofocus')}</label>
+      <div class="chips" data-chipamt>${chips.map(([n,t])=>`<button type="button" class="chip" data-n="${n}" aria-pressed="${n===amt}">${t}</button>`).join('')}</div>
+      <label class="fl"><span>Dùng cho việc gì</span><textarea class="in" name="note" rows="3" maxlength="300" style="resize:none">${esc(pre.note!=null?pre.note:pend?pend.note||'':'')}</textarea></label>
+      ${unpaid.length?`<div class="fl"><span>Đính kèm khoản chờ vốn</span><div class="lst">${unpaid.slice(0,20).map(e=>`<label class="ck"><input type="checkbox" name="ex" value="${e.id}"${sel.has(e.id)?' checked':''}><span class="grow">${esc(e.name)}</span><b>${tr(e.amount)}</b></label>`).join('')}</div></div>`:''}
+      <div class="box box--be"><span class="cap">Sau khi gửi</span><span class="xs">Sơn Nga thấy yêu cầu ở lần đồng bộ tới. Duyệt và chuyển tiền xong, ô Vốn đã cấp tăng, khoản chờ vốn mở được Đã trả.</span></div>`,
+    foot:`<p class="err" role="alert"></p><button type="button" class="b b--do b--w" data-save>${pend?'Lưu yêu cầu':'Gửi yêu cầu'}${amt?' '+tr(amt):''}</button>`,
+    bind(el){
+      bindMoney(el);
+      const inp=el.querySelector('[name=amount]'),sv=el.querySelector('[data-save]');
+      const lab=()=>{const n=money(inp.value);sv.textContent=(pend?'Lưu yêu cầu':'Gửi yêu cầu')+(n&&!isNaN(n)?' '+tr(n):'');el.querySelectorAll('[data-chipamt] .chip').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.n===n)))};
+      inp.addEventListener('input',lab);
+      el.addEventListener('click',async ev=>{
+        const ch=ev.target.closest('[data-chipamt] .chip');if(ch){inp.value=mfmt(+ch.dataset.n);lab();return}
+        if(!ev.target.closest('[data-save]'))return;
+        const n=money(inp.value);if(n==null||isNaN(n)||n<1000)return fieldErr(el,ERR.invalid_money);
+        const data={campaign_id:c.id,amount:n,note:el.querySelector('[name=note]').value,expense_ids:[...el.querySelectorAll('[name=ex]:checked')].map(x=>+x.value)};
+        fieldErr(el,'');
+        await busy(sv,async()=>{try{await save('capreq',null,data);toast((pend?'Đã sửa':'Đã gửi')+' yêu cầu '+tr(n));closeSheet()}catch(err){fieldErr(el,errText(err))}});
+      });
+    }});
 }
 
 /* ---------------- hộp ghi ---------------- */
@@ -447,7 +538,10 @@ function orderSheet(id){
     `<ol class="flow" aria-label="Tiến trình đơn">${FLOW.map((k,i)=>`<li class="${i<idx?'done':i===idx?'cur':''}"${i===idx?' aria-current="step"':''}><i></i><span>${FLOWS[k]}</span></li>`).join('')}</ol>`;
   const reconFields=(gotDef,costDef)=>`<div class="two"><label class="fl"><span>Khách trả thực tế</span>${moneyIn('got_amount',gotDef)}</label><label class="fl"><span>Phí trả hãng ship</span>${moneyIn('ship_cost',costDef)}</label></div><p class="xs" style="margin-top:-6px">Phí trả hãng gồm cả phí thu hộ COD nếu hãng tính. Khách trả ship thẳng cho tài xế: khách trả ghi tiền quà, phí hãng ghi 0.</p>
     <div class="two"><label class="fl"><span>Hãng / người giao</span><input class="in" name="carrier" list="carriers" value="${esc(o.carrier||'')}" autocomplete="off"></label><label class="fl"><span>Ghi chú đối soát</span><input class="in" name="recon_note" value="${esc(o.recon_note||'')}" autocomplete="off" placeholder="VD khách xin bớt"></label></div>
-    <div class="sum"><span><span class="cap" style="color:var(--do-d)">Thực nhận</span><span class="xs" data-rx style="display:block"></span></span><b data-rn></b></div>`;
+    <div class="sum"><span><span class="cap" style="color:var(--do-d)">Thực nhận</span><span class="xs" data-rx style="display:block"></span></span><b data-rn></b></div>
+    <div class="fl"><span>Tiền khách về</span>${seg('money_to',o.money_to||'hkd',MTO)}</div>
+    <div class="fl"><span>Phí ship trả bằng</span>${seg('ship_by',o.ship_paid_by||(o.pay_method==='cod'?'tru-cod':'tk-kd'),SBY)}<span class="xs">Đơn COD mặc định hãng trừ. Đơn chuyển khoản, tiền mặt mặc định trả từ TK KINH DOANH LÀNH.</span></div>
+    ${linked(c)?'<div class="box box--la" data-snx></div>':''}`;
   let act='';
   if(locked)act='';
   else if(o.status==='moi')act=`<div class="box box--do">${o.zone?`<label class="fl"><span>Phí ship báo khách <small>${peak()?'cao điểm Tết, nhập số đã báo':'gõ 0 nếu miễn phí'}</small></span>${moneyIn('ship_fee',o.ship_fee,peak()?'VD 80k':'',o.ship_fee==null?' data-autofocus':'')}</label>`:''}
@@ -471,7 +565,7 @@ function orderSheet(id){
   openSheet({key:'order-'+id,title:esc(o.code),sub:`${o.origin==='tay'?'Nhập tay':'Đặt trên web'} · ${esc(srcName(o.channel))}${o.ref?' ('+esc(o.ref)+')':''} · ${ft(o.created_at)} · <span class="tg st-${o.status}">${SN[o.status]}</span>`,
     body:`${flow}${locked?`<div class="note"><span>${P(I.info,18)}</span><span>${ERR.locked}</span></div>`:''}${act}
     <dl class="kv"><dt>Khách</dt><dd>${esc(o.name)}${o.phone?' · <a href="tel:'+esc(o.phone)+'">'+phoneFmt(o.phone)+'</a>':''}</dd><dt>Giao</dt><dd>${o.zone?ZN[o.zone]:'Không giao'}${o.address?' · '+esc(o.address):''}</dd>
-      <dt>Hàng</dt><dd>${esc(label(o))}</dd><dt>Thanh toán</dt><dd>${PN[o.pay_method]||'COD'}${o.carrier?' · '+esc(o.carrier):''}</dd>${o.note?`<dt>Ghi chú</dt><dd>${esc(o.note)}</dd>`:''}</dl>
+      <dt>Hàng</dt><dd>${esc(label(o))}</dd><dt>Thanh toán</dt><dd>${PN[o.pay_method]||'COD'}${o.carrier?' · '+esc(o.carrier):''}${done&&o.money_to==='rieng'?' · <b style="color:var(--kim-d)">tiền ở Ví riêng Sơn</b>':''}</dd>${o.note?`<dt>Ghi chú</dt><dd>${esc(o.note)}</dd>`:''}</dl>
     ${money_}
     <div class="acts">${o.phone?`<a class="b b--o b--sm" href="tel:${esc(o.phone)}">Gọi</a><a class="b b--o b--sm" href="https://zalo.me/${esc(o.phone)}" target="_blank" rel="noopener">Zalo</a>`:''}<button type="button" class="b b--o b--sm" data-copy>Chép thông tin giao</button>${map?`<a class="b b--o b--sm" href="${map}" target="_blank" rel="noopener">Bản đồ</a>`:''}</div>
     ${locked?'':`<details class="more"><summary>Sửa thông tin đơn</summary><div class="box" data-edit>
@@ -488,11 +582,18 @@ function orderSheet(id){
     <datalist id="carriers">${CARRIERS.map(x=>`<option value="${x}">`).join('')}</datalist>
     <p class="err" role="alert"></p>`,
     bind(el){
-      bindMoney(el);bindSeg(el);bindItems(el);
+      bindMoney(el);bindSeg(el,()=>upd());bindItems(el);
       const rn=el.querySelector('[data-rn]');
       const upd=()=>{if(!rn)return;const g=money(el.querySelector('[name=got_amount]').value),k=money(el.querySelector('[name=ship_cost]').value);
         const net=(isNaN(g)||g==null?0:g)-(isNaN(k)||k==null?0:k),d=net-pNet(o);rn.textContent=vnd(net);
-        el.querySelector('[data-rx]').innerHTML=`kế hoạch ${vnd(pNet(o))} · chênh <b class="${dcls(d)}">${dv(d)}</b>`};
+        el.querySelector('[data-rx]').innerHTML=`kế hoạch ${vnd(pNet(o))} · chênh <b class="${dcls(d)}">${dv(d)}</b>`;
+        const sx=el.querySelector('[data-snx]');if(!sx)return;
+        // 2B: dòng sẽ ghi sang Sơn Nga khi đơn Đã nhận tiền
+        const gg=isNaN(g)||g==null?0:g,kk=isNaN(k)||k==null?0:k,hoan=o.status==='hoan-hang',tru=!hoan&&segVal(el,'ship_by')==='tru-cod'&&gg>=kk,thu=Math.max(0,gg-(tru?kk:0)),n=itemsOf(o).length;
+        const to=segVal(el,'money_to')==='rieng'?'Ví riêng Sơn':'TK HỘ KINH DOANH',parts=[];
+        if(thu>0)parts.push(`${n>1?n+' dòng':'1 dòng'} Thu <b>${vnd(thu)}</b> vào ${to}${tru&&kk?' (khách trả − phí ship hãng trừ)':''}`);
+        if(!tru&&kk>0)parts.push(`1 dòng Chi vận chuyển <b>${vnd(kk)}</b> từ TK KINH DOANH LÀNH`);
+        sx.innerHTML=`<span class="cap" style="color:var(--la)">Sang Sơn Nga thành</span><span class="xs" style="color:var(--la);font-size:13px;line-height:1.5">${parts.length?parts.join('; '):'Không có dòng tiền'}. Mã nguồn LANH:O:${esc(o.code)}.${segVal(el,'money_to')==='rieng'?' Nhớ chuyển sang TK HỘ KINH DOANH trước khi quyết toán.':''}</span>`};
       el.addEventListener('input',e=>{if(e.target.name==='got_amount'||e.target.name==='ship_cost')upd()});upd();
       el.addEventListener('click',async e=>{
         const cp=e.target.closest('[data-copy]');
@@ -505,7 +606,8 @@ function orderSheet(id){
           const cr=el.querySelector('.box [name=carrier]');if(cr)data.carrier=cr.value;
           const g=el.querySelector('.box [name=got_amount]');
           if(g&&(DONE(to)||to==='da-nhan-tien')){const gv=money(g.value),kv=money(el.querySelector('.box [name=ship_cost]').value);if(isNaN(gv)||isNaN(kv)||gv==null||kv==null)return fieldErr(el,ERR.invalid_money);
-            data.got_amount=gv;data.ship_cost=kv;data.recon_note=el.querySelector('.box [name=recon_note]').value}
+            data.got_amount=gv;data.ship_cost=kv;data.recon_note=el.querySelector('.box [name=recon_note]').value;
+            const mtv=segVal(el,'money_to');if(mtv){data.money_to=mtv;data.ship_paid_by=segVal(el,'ship_by')}}
           if(to==='huy'&&!window.confirm('Huỷ đơn '+o.code+'?'))return;
           fieldErr(el,'');
           await busy(sb,async()=>{try{await save('order',id,data);toast(o.code+': '+SN[to]);orderSheet(id)}catch(err){fieldErr(el,errText(err))}});return}
@@ -538,22 +640,38 @@ function expSheet(id){
       <div class="two"><label class="fl"><span>Số tiền</span>${moneyIn('amount',e.amount,'VD 4,5tr')}</label><label class="fl"><span>Số lượng <small>không bắt buộc</small></span><input class="in" name="units" inputmode="numeric" value="${e.units||''}"></label></div>
       <div class="two"><label class="fl"><span>Nơi mua</span><input class="in" name="vendor" value="${esc(e.vendor||'')}" autocomplete="off"></label><label class="fl"><span>Ngày</span><input class="in" type="date" name="spent_on" value="${esc(e.spent_on)}" max="${today()}"></label></div>
       <div class="fl"><span>Thanh toán</span>${seg('paid',e.paid?'1':'0',[['1','Đã trả'],['0','Chưa trả']])}</div>
+      <div data-capwarn style="display:contents"></div>
       <label class="fl"><span>Ghi chú</span><input class="in" name="note" value="${esc(e.note||'')}" autocomplete="off"></label>
       <p class="xs">Phí ship từng đơn ghi ở đối soát đơn, không ghi ở đây để khỏi tính hai lần.</p>`,
-    foot:locked?'':`<p class="err" role="alert"></p><button type="button" class="b b--do b--w" data-save>Lưu khoản chi</button>${id?'<button type="button" class="b b--o b--w" data-del>Xoá khoản chi</button>':''}`,
+    foot:locked?'':`<p class="err" role="alert"></p><button type="button" class="b b--do b--w" data-askcap hidden>Xin thêm vốn</button><button type="button" class="b b--do b--w" data-save>Lưu khoản chi</button>${id?'<button type="button" class="b b--o b--w" data-del>Xoá khoản chi</button>':''}`,
     bind(el){
       bindMoney(el);bindSeg(el);
+      // 2B: chiến dịch đã nối: chi trả từ TK KINH DOANH LÀNH, chỉ được Đã trả khi phần chiến dịch còn đủ tiền (quy tắc B của Sơn Nga)
+      let need=0;
+      const chk=()=>{if(locked||!linked(c)||c.sn_capital==null)return;
+        const amt=money(el.querySelector('[name=amount]').value),left=capLeft(c)+(e0&&e0.paid&&e0.campaign_id===c.id?e0.amount:0);
+        need=amt!=null&&!isNaN(amt)&&amt>left+1000?amt-Math.max(0,left):0;
+        const pb=el.querySelector('[data-seg="paid"] [data-v="1"]'),ub=el.querySelector('[data-seg="paid"] [data-v="0"]'),w=el.querySelector('[data-capwarn]'),ask=el.querySelector('[data-askcap]'),sv=el.querySelector('[data-save]');
+        if(need){pb.disabled=true;if(pb.getAttribute('aria-pressed')==='true'){pb.setAttribute('aria-pressed','false');ub.setAttribute('aria-pressed','true')}
+          w.innerHTML=`<div class="note note--do"><span>${P(I.alert,18)}</span><span>TK KINH DOANH LÀNH còn <b>${tr(Math.max(0,left))}</b>, khoản này <b>${tr(amt)}</b>, thiếu <b>${tr(need)}</b>. Chưa chọn được Đã trả.</span></div>
+            <div class="box box--be"><span class="cap">Sau khi lưu</span><span class="xs">Khoản nằm ở mục Chi chưa trả, chưa sang Sơn Nga. Vốn về thì mở lại khoản này và chọn Đã trả.</span></div>`;
+          ask.hidden=false;ask.textContent='Xin thêm '+tr(need)+' vốn';sv.textContent='Lưu, chưa trả';sv.className='b b--o b--w'}
+        else{pb.disabled=false;w.innerHTML='';ask.hidden=true;sv.textContent='Lưu khoản chi';sv.className='b b--do b--w'}};
+      el.querySelector('[name=amount]').addEventListener('input',chk);chk();
       el.querySelector('[data-chips]').addEventListener('click',ev=>{const b=ev.target.closest('.chip');if(!b)return;b.parentNode.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
       el.addEventListener('click',async ev=>{
-        const s=ev.target.closest('[data-save]'),d=ev.target.closest('[data-del]');
-        if(s){const q=n=>el.querySelector(`[name=${n}]`),amt=money(q('amount').value);
+        const s=ev.target.closest('[data-save],[data-askcap]'),d=ev.target.closest('[data-del]');
+        if(s){const q=n=>el.querySelector(`[name=${n}]`),amt=money(q('amount').value),ask=s.hasAttribute('data-askcap');
           if(q('name').value.trim().length<2)return fieldErr(el,'Nhập nội dung chi.');
           if(amt==null||isNaN(amt)||amt<1)return fieldErr(el,ERR.invalid_amount);
           const cat=el.querySelector('[data-chips] [aria-pressed="true"]');
           const data={cat:cat?cat.dataset.v:'khac',name:q('name').value,amount:amt,units:q('units').value.replace(/\D/g,''),vendor:q('vendor').value,spent_on:q('spent_on').value,paid:segVal(el,'paid')==='1',note:q('note').value};
           if(!id)data.campaign_id=c.id;
           fieldErr(el,'');
-          await busy(s,async()=>{try{await save('expense',id||null,data);toast('Đã lưu khoản chi');closeSheet()}catch(err){fieldErr(el,errText(err))}})}
+          if(ask)data.paid=false;
+          await busy(s,async()=>{try{const row=await save('expense',id||null,data);
+            if(ask){capSheet(c,{amount:need,expense_ids:[row.id],note:row.name});toast('Đã lưu khoản chi, chưa trả');return}
+            toast('Đã lưu khoản chi');closeSheet()}catch(err){fieldErr(el,err&&err.message==='no_capital'&&err.data&&err.data.left!=null?'TK KINH DOANH LÀNH còn '+tr(err.data.left)+', chưa đủ cho khoản này. Lưu Chưa trả rồi xin thêm vốn.':errText(err))}})}
         if(d){if(!window.confirm('Xoá khoản chi "'+e.name+'"?'))return;
           await busy(d,async()=>{try{await save('expense-delete',id,{});toast('Đã xoá khoản chi');closeSheet()}catch(err){fieldErr(el,errText(err))}})}
       });
@@ -572,17 +690,22 @@ function campSheet(id){
     <button type="button" class="x" data-rm aria-label="Bỏ set">${P(I.x,16)}</button></div>`;
   openSheet({key:'camp-'+(id||'new'),title:id?'Sửa chiến dịch':'Tạo chiến dịch',sub:id?esc(c.name):'Đơn web tự vào chiến dịch Đang bán',
     body:`<label class="fl"><span>Tên chiến dịch</span><input class="in" name="name" value="${esc(c.name)}" placeholder="VD Tết 2027" autocomplete="off" data-autofocus></label>
-      <div class="fl"><span>Trạng thái</span>${seg('status',c.status,CS)}<span class="xs">Đã quyết toán: khoá sổ chiến dịch, không sửa đơn và chi được nữa. Mở lại bằng cách chọn trạng thái khác.</span></div>
+      <div class="fl"><span>Trạng thái</span>${seg('status',c.status,linked(c0)&&c.status!=='settled'?CS.filter(([k])=>k!=='settled'):CS)}<span class="xs">${linked(c0)?'Đã nối Sơn Nga Family: quyết toán và mở lại làm ở Sơn Nga, Lành tự khoá sổ theo.':'Đã quyết toán: khoá sổ chiến dịch, không sửa đơn và chi được nữa. Mở lại bằng cách chọn trạng thái khác.'}</span></div>
       <div class="two"><label class="fl"><span>Bắt đầu bán</span><input class="in" type="date" name="start_date" value="${esc(c.start_date||'')}"></label><label class="fl"><span>Kết thúc</span><input class="in" type="date" name="end_date" value="${esc(c.end_date||'')}"></label></div>
       <label class="fl"><span>Mục tiêu doanh thu</span>${moneyIn('target_revenue',c.target_revenue,'VD 60tr')}</label>
-      <div class="note"><span>${P(I.info,18)}</span><span>Vốn chiến dịch cấp ở Sơn Nga Family (nút Thêm vốn), không nhập ở đây. Khi có giai đoạn 2, bạn gửi yêu cầu cấp vốn ngay tại Lành.</span></div>
+      ${id?`<div class="note"><span>${P(I.info,18)}</span><span>${linked(c0)?'Đã nối Sơn Nga Family. Vốn do Sơn Nga cấp: thiếu vốn thì bấm Xin thêm vốn ở thẻ Vốn và tài khoản.':'Chưa nối Sơn Nga Family. Xin vốn ở tab Chiến dịch, thẻ Vốn và tài khoản.'}</span></div>`
+        :`<div class="box box--do"><label class="fl"><span>Vốn xin cấp <small>gửi Sơn Nga duyệt</small></span>${moneyIn('capital',null,'VD 18tr')}</label><span class="xs" data-capsug>Để trống nếu chưa cần vốn.</span></div>`}
       <div class="fl"><span>Set quà <small>tên · giá · số chuẩn bị</small></span><div class="lst" data-sets>${(c.sets||[]).map(setRow).join('')}</div>
         <button type="button" class="b b--o b--sm" data-addset style="align-self:flex-start">${P(I.plus,16)}Thêm set</button><span class="xs">Giá hai set trên web cố định theo trang web; muốn đổi giá web, nhắn Claude sửa cả trang và máy chủ.</span></div>
       <div class="fl"><span>Ngân sách chi</span><div class="two">${CATS.map(([k,t])=>`<label class="fl"><span>${t}</span>${moneyIn('b_'+k,(c.budget||{})[k],'0')}</label>`).join('')}</div></div>
       <label class="fl"><span>Ghi chú</span><input class="in" name="note" value="${esc(c.note||'')}" autocomplete="off"></label>`,
-    foot:`<p class="err" role="alert"></p><button type="button" class="b b--do b--w" data-save>${id?'Lưu chiến dịch':'Tạo chiến dịch'}</button>`,
+    foot:`<p class="err" role="alert"></p>${id?'':`<p class="xs" data-campafter style="margin:0">Sau khi lưu: chiến dịch ở Nháp; có vốn xin cấp thì yêu cầu sang Sơn Nga, Sơn Nga duyệt thì chiến dịch được nối hai bên và mở bán được.</p>`}<button type="button" class="b b--do b--w" data-save>${id?'Lưu chiến dịch':'Tạo chiến dịch'}</button>`,
     bind(el){
       bindMoney(el);bindSeg(el);
+      if(!id){const ci=el.querySelector('[name=capital]'),sv=el.querySelector('[data-save]'),sg=el.querySelector('[data-capsug]');
+        const bt=()=>{let t=0;for(const [k] of CATS){const x=money(el.querySelector('[name=b_'+k+']').value);if(x&&!isNaN(x))t+=x}return t};
+        const lab=()=>{const n=money(ci.value),b=bt();sv.textContent=n&&!isNaN(n)?'Lưu và gửi xin vốn':'Tạo chiến dịch';sg.textContent=b?'Gợi ý theo ngân sách: '+tr(b)+'. Để trống nếu chưa cần vốn.':'Để trống nếu chưa cần vốn.'};
+        el.addEventListener('input',e=>{if(e.target.name==='capital'||/^b_/.test(e.target.name||''))lab()});lab()}
       el.addEventListener('click',async ev=>{
         if(ev.target.closest('[data-addset]')){el.querySelector('[data-sets]').insertAdjacentHTML('beforeend',setRow({}));el.querySelector('[data-sets] .csr:last-child input').focus();return}
         const rm=ev.target.closest('[data-rm]');if(rm){rm.closest('.csr').remove();return}
@@ -599,9 +722,13 @@ function campSheet(id){
         const tg=money(q('target_revenue').value);if(tg!=null&&isNaN(tg))return fieldErr(el,ERR.invalid_money);
         const data={name,status:segVal(el,'status'),start_date:q('start_date').value,end_date:q('end_date').value,target_revenue:tg,sets,budget,note:q('note').value};
         if(!id){let code=slug(name)||'chien-dich';if(D.campaigns.some(x=>x.code===code))code=(code+'-'+Date.now().toString(36)).slice(0,40);data.code=code}
+        const cap=id?null:money(el.querySelector('[name=capital]').value);if(cap!=null&&(isNaN(cap)||cap<1000))return fieldErr(el,ERR.invalid_money);
         if(c0&&c0.status!=='settled'&&data.status==='settled'&&!window.confirm('Quyết toán và khoá sổ '+name+'? Sau đó không sửa đơn, chi của chiến dịch được nữa.'))return;
         fieldErr(el,'');
-        await busy(s,async()=>{try{const row=await save('campaign',id||null,data);S.camp=row.id;toast(id?'Đã lưu chiến dịch':'Đã tạo '+row.name);closeSheet();render()}catch(err){fieldErr(el,errText(err))}});
+        await busy(s,async()=>{try{const row=await save('campaign',id||null,data);S.camp=row.id;
+          if(cap){try{await save('capreq',null,{campaign_id:row.id,amount:cap,note:'Vốn mở chiến dịch'});toast('Đã tạo '+row.name+', gửi xin vốn '+tr(cap))}catch(e2){toast('Đã tạo '+row.name+'. Chưa gửi được yêu cầu vốn: '+errText(e2))}}
+          else toast(id?'Đã lưu chiến dịch':'Đã tạo '+row.name);
+          closeSheet();render()}catch(err){fieldErr(el,errText(err))}});
       });
     }});
 }
@@ -636,7 +763,12 @@ document.addEventListener('click',async e=>{
   else if(a==='sources')openSources();
   else if(a==='csv')csv();
   else if(a==='adopt')adopt(t);
+  else if(a==='capreq'&&camp())capSheet(camp());
 });
+// 2B: huỷ yêu cầu vốn đang chờ
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-capcancel]');if(!b)return;
+  if(!window.confirm('Huỷ yêu cầu cấp vốn này?'))return;
+  await busy(b,async()=>{try{await save('capreq-cancel',+b.dataset.capcancel,{});toast('Đã huỷ yêu cầu')}catch(err){toast(errText(err))}})});
 document.addEventListener('input',e=>{if(e.target.id==='oq'){S.q=e.target.value;rOrderList()}});
 document.addEventListener('change',e=>{if(e.target.id==='osrc'){S.src=e.target.value;rOrderList()}});
 async function adopt(btn){

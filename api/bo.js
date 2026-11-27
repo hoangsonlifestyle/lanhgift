@@ -1,4 +1,4 @@
-// Dashboard Lành: GET trả toàn bộ dữ liệu (chiến dịch, nguồn đơn, đơn, chi phí); POST {action, id, data} để ghi. Cần đăng nhập.
+// Dashboard Lành: GET trả toàn bộ dữ liệu (chiến dịch, nguồn đơn, đơn, chi phí, yêu cầu vốn, đồng bộ); POST {action, id, data} để ghi. Cần đăng nhập.
 // Mọi kiểm tra nghiệp vụ nằm trong hàm Supabase bo2_*; ở đây chỉ chặn đầu vào lạ và đổi lỗi thành mã ngắn.
 const { env, authed, rpc, noStore } = require('./_lib');
 
@@ -8,7 +8,11 @@ const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
 function fail(res, e) {
   const msg = String((e && e.message) || '');
   const code = /^[a-z_]{3,40}$/.test(msg) ? msg : 'invalid';
-  if (e && e.status && e.status < 500) return res.status(400).json({ error: code });
+  if (e && e.status && e.status < 500) {
+    // Thiếu vốn: kèm số còn trong TK KINH DOANH LÀNH để màn hình gợi ý xin thêm đúng số
+    if (code === 'no_capital' && /^\d{1,13}$/.test(e.hint || '')) return res.status(400).json({ error: code, left: Number(e.hint) });
+    return res.status(400).json({ error: code });
+  }
   console.error('bo', msg);
   return res.status(502).json({ error: 'upstream' });
 }
@@ -29,6 +33,16 @@ module.exports = async (req, res) => {
     if (b.action === 'expense-delete') {
       if (id === null) return res.status(400).json({ error: 'bad_input' });
       await rpc('bo2_expense_delete', { p_key: env('BO_KEY'), p_id: id });
+      return res.status(200).json({ id });
+    }
+    if (b.action === 'capreq') {
+      if (!isObj(b.data) || JSON.stringify(b.data).length > 2000) return res.status(400).json({ error: 'bad_input' });
+      const row = await rpc('bo2_capreq_save', { p_key: env('BO_KEY'), p_data: b.data });
+      return res.status(200).json({ row });
+    }
+    if (b.action === 'capreq-cancel') {
+      if (id === null) return res.status(400).json({ error: 'bad_input' });
+      await rpc('bo2_capreq_cancel', { p_key: env('BO_KEY'), p_id: id });
       return res.status(200).json({ id });
     }
     if (b.action === 'sources') {

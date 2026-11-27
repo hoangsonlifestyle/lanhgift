@@ -69,8 +69,26 @@ function create(T){
     ex(2,6,'vanchuyen','Ship nhập hàng (minh hoạ)',220000),ex(2,2,'khac','Băng keo, giấy gói (minh hoạ)',180000),
     ex(1,98,'nhap','Bánh và trà (minh hoạ)',3200000,20),ex(1,97,'baobi','Hộp giấy (minh hoạ)',600000,20),ex(1,95,'quangcao','Quảng cáo (minh hoạ)',500000)
   ].sort((a,b)=>b.spent_on.localeCompare(a.spent_on)||b.id-a.id);
-  return {campaigns,sources:clone(SRC),orders,expenses,seq:{o:id,e:eid,c:2},first:true};
+  // 2B: hai chiến dịch đã nối Sơn Nga (minh hoạ). Vốn đặt sao cho còn khoảng 1,9 tr trong TK KINH DOANH LÀNH.
+  orders.forEach(o=>{o.money_to='hkd';o.ship_paid_by=null});
+  const rieng=orders.find(o=>o.campaign_id===2&&o.status==='da-nhan-tien'&&o.pay_method==='ck');if(rieng)rieng.money_to='rieng';
+  const db0={campaigns,orders,expenses};
+  campaigns[0].sn_id='CD-0001';campaigns[0].sn_status='settled';campaigns[0].sn_capital=Math.ceil(kdOut(db0,campaigns[0])/1e6)*1e6;campaigns[0].sn_synced_at=at(56,10);
+  campaigns[1].sn_id='CD-0002';campaigns[1].sn_status='running';campaigns[1].sn_capital=Math.ceil((kdOut(db0,campaigns[1])+1900000)/1e6)*1e6;campaigns[1].sn_synced_at=new Date(Date.now()-18*6e4).toISOString();
+  const unpaid=expenses.find(e=>e.campaign_id===2&&!e.paid);
+  const capital_requests=[
+    {id:2,campaign_id:2,kind:'them',amount:5000000,note:'In hộp logo cho đơn doanh nghiệp (minh hoạ)',expense_ids:unpaid?[unpaid.id]:[],status:'cho-duyet',decided_amount:null,reply:null,created_at:new Date(Date.now()-35*6e4).toISOString(),decided_at:null},
+    {id:1,campaign_id:2,kind:'them',amount:8000000,note:'Nhập thêm mứt và giỏ (minh hoạ)',expense_ids:[],status:'da-duyet',decided_amount:5000000,reply:'Nhập trước 20 set, đợt sau xin tiếp (minh hoạ)',created_at:at(2,10),decided_at:at(2,15)}];
+  // Đã sang Sơn Nga: mọi đơn đã nhận tiền / hoàn và chi đã trả, trừ 2 đơn mới nhất (chờ lần đồng bộ sau)
+  const doneT=orders.filter(o=>o.campaign_id===2&&DONE(o.status)).sort((a,b)=>b.received_at.localeCompare(a.received_at));
+  const sync_items=[...doneT.slice(2).map(o=>({ref:'O:'+o.code,campaign_id:2,state:'ok',message:null,at:new Date().toISOString()})),
+    ...expenses.filter(e=>e.campaign_id===2&&e.paid).map(e=>({ref:'E:'+e.id,campaign_id:2,state:'ok',message:null,at:new Date().toISOString()}))];
+  const sync_runs=[{id:1,at:new Date(Date.now()-18*6e4).toISOString(),source:'tab',added:3,updated:1,deleted:0,failed:0,pending:0,message:null}];
+  return {campaigns,sources:clone(SRC),orders,expenses,capital_requests,sync_items,sync_runs,seq:{o:id,e:eid,c:2,r:2},first:true};
 }
+const shipBy=o=>{const k=o.ship_cost||0;if(k<=0)return 'none';if(o.status==='hoan-hang')return 'tk-kd';const b=o.ship_paid_by||(o.pay_method==='cod'?'tru-cod':'tk-kd');return b==='tru-cod'&&(o.got_amount||0)>=k?'tru-cod':'tk-kd'};
+const kdOut=(db,c,skip)=>db.expenses.filter(e=>e.campaign_id===c.id&&e.paid&&e.id!==skip).reduce((t,e)=>t+e.amount,0)
+  +db.orders.filter(o=>o.campaign_id===c.id&&DONE(o.status)&&shipBy(o)==='tk-kd').reduce((t,o)=>t+(o.ship_cost||0),0);
 
 function camp(db,id){return db.campaigns.find(c=>c.id===+id)}
 function running(db){const r=db.campaigns.filter(c=>c.status==='running').sort((a,b)=>(b.start_date||'').localeCompare(a.start_date||'')||b.id-a.id);return r[0]?r[0].id:null}
@@ -101,6 +119,9 @@ function saveOrder(db,id,d){
   if('got_amount' in d)o.got_amount=num(d.got_amount,2e9);
   if('ship_cost' in d)o.ship_cost=num(d.ship_cost,2e6);
   if('status' in d)o.status=d.status;
+  if('money_to' in d){if(!['hkd','rieng'].includes(d.money_to))err('invalid_money_to');o.money_to=d.money_to}
+  if('ship_paid_by' in d){o.ship_paid_by=d.ship_paid_by||null;if(o.ship_paid_by&&!['tru-cod','tk-kd'].includes(o.ship_paid_by))err('invalid_ship_by')}
+  if(o.money_to==null)o.money_to='hkd';
   if(o.status==='da-nhan-tien'){o.got_amount=o.got_amount??o.total+(o.ship_fee||0);o.ship_cost=o.ship_cost??(o.ship_fee||0);o.received_at=wasAt||new Date().toISOString()}
   else if(o.status==='hoan-hang'){o.got_amount=o.got_amount??0;o.ship_cost=o.ship_cost??(o.ship_fee||0);o.received_at=wasAt||new Date().toISOString()}
   else o.received_at=null;
@@ -110,8 +131,8 @@ function saveOrder(db,id,d){
   return clone(o);
 }
 function saveExpense(db,id,d){
-  let e;if(id==null)e={id:++db.seq.e,campaign_id:running(db),spent_on:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Ho_Chi_Minh'}),cat:'khac',name:null,amount:null,units:null,vendor:null,paid:true,note:null};
-  else{const x=db.expenses.find(y=>y.id===id);if(!x)err('not_found');editable(db,x.campaign_id);e=clone(x)}
+  let e,e0=null;if(id==null)e={id:++db.seq.e,campaign_id:running(db),spent_on:new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Ho_Chi_Minh'}),cat:'khac',name:null,amount:null,units:null,vendor:null,paid:true,note:null};
+  else{const x=db.expenses.find(y=>y.id===id);if(!x)err('not_found');editable(db,x.campaign_id);e=clone(x);e0=x}
   if('campaign_id' in d){if(!camp(db,d.campaign_id))err('invalid_campaign');e.campaign_id=+d.campaign_id}
   if(e.campaign_id==null)err('invalid_campaign');editable(db,e.campaign_id);
   ['spent_on','cat'].forEach(k=>{if(k in d)e[k]=d[k]});
@@ -120,6 +141,9 @@ function saveExpense(db,id,d){
   if('units' in d)e.units=d.units?+d.units:null;
   ['vendor','note'].forEach(k=>{if(k in d)e[k]=String(d[k]||'').trim()||null});
   if('paid' in d)e.paid=!!d.paid;
+  const c=camp(db,e.campaign_id);
+  if(e.paid&&c&&c.sn_id&&c.sn_capital!=null&&(!e0||!e0.paid||e.amount>e0.amount||e.campaign_id!==e0.campaign_id)){
+    const left=c.sn_capital-kdOut(db,c,e0?e0.id:null);if(e.amount>left+1000){const x=new Error('no_capital');x.data={error:'no_capital',left:Math.max(0,left)};throw x}}
   const i=db.expenses.findIndex(y=>y.id===e.id);if(i>=0)db.expenses[i]=e;else db.expenses.unshift(e);
   return clone(e);
 }
@@ -127,6 +151,8 @@ function saveCampaign(db,id,d){
   let c;if(id==null)c={id:++db.seq.c,code:d.code||'cd-'+Date.now(),name:'',status:'draft',start_date:null,end_date:null,target_revenue:null,budget:{},sets:[],note:null,settled_at:null};
   else{const x=camp(db,id);if(!x)err('not_found');c=clone(x);if(x.status==='settled'&&(d.status||'settled')==='settled'&&Object.keys(d).some(k=>!['status','note'].includes(k)))err('locked')}
   if('code' in d){if(db.campaigns.some(x=>x.code===d.code&&x.id!==c.id))err('code_taken');c.code=d.code}
+  if(id!=null&&c.sn_id&&(('status' in d&&(d.status==='settled')!==(c.status==='settled'))||('code' in d&&d.code!==c.code)))err('sn_controls');
+  if(id!=null&&!c.sn_id&&d.status==='running'&&c.status!=='running'&&db.capital_requests.some(r=>r.campaign_id===c.id&&r.kind==='tao'&&r.status==='cho-duyet'))err('wait_capital');
   ['name','status','note'].forEach(k=>{if(k in d)c[k]=d[k]});if(!c.name||c.name.length<2)err('invalid_name');
   ['start_date','end_date'].forEach(k=>{if(k in d)c[k]=d[k]||null});if(c.start_date&&c.end_date&&c.end_date<c.start_date)err('invalid_date');
   if('target_revenue' in d)c.target_revenue=num(d.target_revenue,2e9);
@@ -137,12 +163,20 @@ function saveCampaign(db,id,d){
   return clone(c);
 }
 function handle(db,method,body){
-  if(method==='GET')return clone({campaigns:db.campaigns,sources:db.sources,orders:db.orders,expenses:db.expenses,at:new Date().toISOString()});
+  if(method==='GET')return clone({campaigns:db.campaigns,sources:db.sources,orders:db.orders,expenses:db.expenses,capital_requests:db.capital_requests,sync_items:db.sync_items,sync_runs:db.sync_runs,at:new Date().toISOString()});
   const b=body||{},id=b.id==null?null:+b.id;
   if(b.action==='order')return {row:saveOrder(db,id,b.data||{})};
   if(b.action==='expense')return {row:saveExpense(db,id,b.data||{})};
   if(b.action==='campaign')return {row:saveCampaign(db,id,b.data||{})};
   if(b.action==='expense-delete'){const e=db.expenses.find(x=>x.id===id);if(!e)err('not_found');editable(db,e.campaign_id);db.expenses=db.expenses.filter(x=>x.id!==id);return {id}}
+  if(b.action==='capreq'){const d=b.data||{},c=camp(db,d.campaign_id);if(!c)err('invalid_campaign');if(c.status==='settled')err('locked');
+    const n=num(d.amount,2e9);if(!n||n<1000)err('invalid_amount');
+    let r=db.capital_requests.find(x=>x.campaign_id===c.id&&x.status==='cho-duyet');
+    const ids=(d.expense_ids||[]).map(Number).filter(x=>db.expenses.some(e=>e.id===x&&e.campaign_id===c.id));
+    if(r)Object.assign(r,{amount:n,note:String(d.note||'').trim()||null,expense_ids:ids,kind:c.sn_id?'them':'tao',created_at:new Date().toISOString()});
+    else{r={id:++db.seq.r,campaign_id:c.id,kind:c.sn_id?'them':'tao',amount:n,note:String(d.note||'').trim()||null,expense_ids:ids,status:'cho-duyet',decided_amount:null,reply:null,created_at:new Date().toISOString(),decided_at:null};db.capital_requests.unshift(r)}
+    return {row:clone(r)}}
+  if(b.action==='capreq-cancel'){const r=db.capital_requests.find(x=>x.id===id&&x.status==='cho-duyet');if(!r)err('not_found');r.status='huy';r.decided_at=new Date().toISOString();return {id}}
   if(b.action==='sources'){(b.list||[]).forEach(s=>{const x=db.sources.find(y=>y.key===s.key);if(x)Object.assign(x,{label:s.label,sort:s.sort,active:s.active});else db.sources.push({key:s.key,label:s.label,sort:s.sort,active:s.active,auto:false})});
     db.sources.sort((a,b)=>a.sort-b.sort);return {sources:clone(db.sources)}}
   err('bad_input');

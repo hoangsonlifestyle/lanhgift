@@ -56,6 +56,7 @@ async function rpc(fn, args) {
   if (!r.ok) {
     const err = new Error((data && data.message) || ('supabase ' + r.status));
     err.status = r.status;
+    if (data && typeof data.hint === 'string') err.hint = data.hint.slice(0, 40);
     throw err;
   }
   return data;

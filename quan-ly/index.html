@@ -227,6 +227,20 @@ select.in{appearance:auto}
 .seg{display:grid;gap:4px;padding:4px;border-radius:14px;background:var(--be)}
 .seg button{min-height:42px;border-radius:11px;border:0;background:transparent;font-weight:700;font-size:13.5px;color:var(--muc2);padding:0 6px}
 .seg button[aria-pressed="true"]{background:#fff;color:var(--do-d);box-shadow:0 2px 8px rgba(43,26,18,.12)}
+.seg button[disabled]{color:var(--nhat);opacity:.55;cursor:not-allowed}
+/* 2B: vốn, yêu cầu vốn, đồng bộ Sơn Nga */
+.k3{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+@media (min-width:640px){.k3{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}}
+.tl--kim{background:var(--kim-n);border-color:#EBCF8F}.tl--kim .cap,.tl--kim b{color:var(--kim-d)}
+.box--be{background:var(--kem2);border-color:transparent;gap:6px}
+.box--la{background:#F1F8F3;border-color:#BFE0CB;gap:4px}
+.kvr{display:flex;justify-content:space-between;gap:12px;font-size:13.5px}.kvr span{color:var(--nhat)}
+.kvr--do{padding-top:6px;border-top:1px dashed var(--vien2)}.kvr--do span,.kvr--do b{color:var(--do-d)}
+.ck{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 12px;border-radius:14px;border:1.5px solid var(--vien);background:#fff;font-size:14px}
+.ck input{width:20px;height:20px;accent-color:var(--do);flex:0 0 auto}
+.lr--req{flex-wrap:wrap}.lr--do{background:var(--do-nn)}.lr--do .xs{color:var(--do-d)}.lr--kim{background:var(--kim-n)}.lr--kim .xs{color:var(--kim-d)}
+.tg--la,.rq-da-duyet{background:var(--la-n);color:var(--la)}.rq-cho-duyet{background:var(--kim-n);color:var(--kim-d)}
+.rq-tu-choi{background:var(--do-n);color:var(--do-d)}.rq-huy{background:var(--be);color:var(--nhat)}
 .itr{display:grid;grid-template-columns:minmax(0,1fr) 116px 128px;gap:8px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--kem2);border:1.5px solid transparent}
 .itr.on{border-color:var(--do);background:var(--do-nn)}
 .itr .in{min-height:44px;font-size:15px;padding:0 10px}
