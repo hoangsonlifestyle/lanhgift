@@ -191,11 +191,27 @@ html.od-lock,html.od-lock body{overflow:hidden}
 .od__legal{grid-column:1/-1;margin:2px 0 0;font-size:.72rem;line-height:1.45;color:#8A7766}
 .od__ship{margin:0;padding:10px 12px;border-radius:10px;background:#FBF3E4;font-size:.8rem;line-height:1.5;color:#5A4636}
 .od__done{padding:8px 24px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;text-align:center;outline:none}
-.od__ok{width:64px;height:64px;margin:6px auto 12px;display:block}
-.od__ok circle{fill:#FFF0E6;stroke:var(--do);stroke-width:2.5}
-.od__ok path{fill:none;stroke:var(--do);stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:44;stroke-dashoffset:44}
-.od__done:not([hidden]) .od__ok path{animation:od-draw .5s .15s var(--out) forwards}
-@keyframes od-draw{to{stroke-dashoffset:0}}
+/* Lucian UX/UI Prompt #342 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#342
+   Hộp quà mở nơ: giữ thời lượng, đường cong, thứ tự của bản gốc; màu theo Mùi Lành, cỡ 0,8 lần, tự mở khi đơn gửi xong. */
+.od-gift{position:relative;height:176px;margin:0 0 2px;overflow:hidden;pointer-events:none}
+.od-gift__ray{position:absolute;left:50%;top:104px;width:340px;height:340px;margin:-170px 0 0 -170px;background:repeating-conic-gradient(from 0deg,rgba(244,178,35,.55) 0 10deg,transparent 10deg 30deg);-webkit-mask-image:radial-gradient(closest-side,#000,transparent);mask-image:radial-gradient(closest-side,#000,transparent);opacity:0;transform:scale(.3) rotate(0);transition:opacity .4s,transform .8s cubic-bezier(.3,1.2,.4,1)}
+.od-gift.is-open .od-gift__ray{opacity:.85;transform:scale(1) rotate(20deg);animation:od-gift-spin 12s linear infinite .8s}
+@keyframes od-gift-spin{to{transform:scale(1) rotate(380deg)}}
+.od-gift__box{position:absolute;left:50%;top:50px;width:136px;height:120px;margin-left:-68px}
+.od-gift__body{position:absolute;left:6px;right:6px;top:37px;bottom:0;border-radius:7px;background:linear-gradient(90deg,#C93323,var(--do));box-shadow:inset 0 -8px 0 rgba(0,0,0,.1)}
+.od-gift__body::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:19px;margin-left:-9.5px;background:var(--vang);box-shadow:inset 0 0 0 2px rgba(0,0,0,.05);transform-origin:50% 0;transition:transform .45s cubic-bezier(.6,0,.4,1) .15s}
+.od-gift__lid{position:absolute;left:0;right:0;top:16px;height:29px;border-radius:7px;background:linear-gradient(90deg,var(--do-son),#C2301F);box-shadow:0 5px 0 rgba(0,0,0,.08);transform-origin:12% 100%;transition:transform .75s cubic-bezier(.3,1.1,.5,1) .55s,opacity .35s .95s}
+.od-gift__lid::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:19px;margin-left:-9.5px;background:#F7C548;transform-origin:50% 100%;transition:transform .45s cubic-bezier(.6,0,.4,1) .15s}
+.od-gift__bow{position:absolute;left:50%;top:-5px;width:77px;height:35px;margin-left:-38.5px;transform-origin:50% 80%;transition:transform .5s cubic-bezier(.5,0,.3,1),opacity .4s .2s}
+.od-gift.is-open .od-gift__bow{transform:translateY(-8px) scale(.2) rotate(30deg);opacity:0}
+.od-gift.is-open .od-gift__body::before,.od-gift.is-open .od-gift__lid::before{transform:scaleY(0)}
+.od-gift.is-open .od-gift__lid{transform:translate(-136px,-120px) rotate(-70deg);opacity:0}
+.od-gift__card{position:absolute;left:50%;top:66px;width:156px;margin-left:-78px;padding:10px 12px;border-radius:12px;background:#FFFDF8;box-shadow:0 14px 30px -12px rgba(74,11,7,.45),0 0 0 1px rgba(217,164,65,.55);text-align:center;opacity:0;transform:translateY(64px) scale(.6);transition:opacity .3s .7s,transform .7s cubic-bezier(.3,1.5,.5,1) .7s}
+.od-gift.is-open .od-gift__card{opacity:1;transform:translateY(-58px) scale(1)}
+.od-gift__card small{display:block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--do)}
+.od-gift__card b{display:block;margin-top:3px;font-size:1.18rem;font-weight:800;color:var(--do-tham)}
+.od-gift__sp{position:absolute;left:50%;top:110px;width:8px;height:8px;background:var(--vang);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);animation:od-gift-sp 1.3s ease-out forwards}
+@keyframes od-gift-sp{0%{transform:translate(0,0) scale(.4);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.3) rotate(180deg);opacity:0}}
 .od__code{margin:8px 0 14px;font-size:.95rem;color:#5A4636}
 .od__code b{display:inline-block;margin-left:6px;padding:4px 10px;border-radius:8px;background:#FFF0E6;color:var(--do);font-weight:800;letter-spacing:.06em;font-variant-numeric:tabular-nums}
 .od__bill{margin:0 0 14px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid rgba(43,26,18,.1);display:grid;grid-template-columns:auto 1fr;gap:8px 14px;text-align:left;font-size:.9rem}
@@ -219,9 +235,63 @@ html.od-lock,html.od-lock body{overflow:hidden}
 @media (prefers-reduced-motion:reduce){
   .od__card,.od::backdrop{transition:opacity .2s ease!important}
   .od__card{transform:translate(-50%,-50%)!important}
-  .od__ok path{stroke-dashoffset:0!important;animation:none!important}
+  .od-gift *,.od-gift *::before{transition-duration:.01s!important;transition-delay:0s!important;animation:none!important}
 }
 @media (prefers-reduced-motion:reduce) and (max-width:640px){.od__card{transform:none!important;opacity:0}.od.on .od__card{opacity:1}}
+/* Lucian UX/UI Prompt #450 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#450
+   Nút về đầu trang (vòng đỏ theo phần đã đọc) + bong bóng Zalo nở thành bảng nhỏ. Giữ thời lượng, lò xo, thứ tự hiện của bản gốc;
+   bỏ ô chat giả, thay bằng hai việc thật: Nhắn Zalo cho Lành, Đặt quà Tết. Trang chủ chỉ có bong bóng, hiện sau hành trình. */
+.lx-fab{--sp:cubic-bezier(.34,1.45,.64,1);--ez:cubic-bezier(.2,.8,.2,1);position:fixed;right:max(16px,calc(env(safe-area-inset-right) + 12px));bottom:calc(16px + env(safe-area-inset-bottom));z-index:58;display:flex;flex-direction:column;align-items:flex-end;gap:12px;font-family:var(--f-body);color:var(--muc);pointer-events:none;opacity:0;transform:translateY(16px);visibility:hidden;transition:opacity .3s var(--ez),transform .45s var(--sp),bottom .35s var(--ez),visibility 0s .45s}
+.lx-fab.is-on{opacity:1;transform:none;visibility:visible;transition:opacity .3s var(--ez),transform .45s var(--sp),bottom .35s var(--ez),visibility 0s}
+.lx-fab>*{pointer-events:auto}
+.lx-fab--home .lx-fab__top{display:none}
+.lx-fab__top{position:relative;width:44px;height:44px;margin-right:6px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:#FFFDF8;color:var(--muc);box-shadow:0 0 0 1px rgba(43,26,18,.12),0 10px 22px -12px rgba(74,11,7,.45);overflow:hidden;cursor:pointer;transition:transform .5s var(--sp),opacity .25s,visibility 0s}
+.lx-fab__top:hover{transform:translateY(-2px)}
+.lx-fab__top:active{transform:scale(.92)}
+.lx-fab__top>*{grid-area:1/1}
+.lx-fab__top svg.rg{position:absolute;inset:0;width:44px;height:44px;transform:rotate(-90deg)}
+.lx-fab__top .rg circle{fill:none;stroke-width:2.5}
+.lx-fab__top .rg .tr{stroke:rgba(43,26,18,.12)}
+.lx-fab__top .rg .pr{stroke:var(--do);stroke-linecap:round;stroke-dasharray:122.5;stroke-dashoffset:calc(122.5 * (1 - var(--p,0)))}
+.lx-fab__top svg.ar{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.lx-fab__top.is-fly svg.ar{animation:lx-fly .7s cubic-bezier(.5,0,.3,1)}
+@keyframes lx-fly{45%{transform:translateY(-30px);opacity:0}46%{transform:translateY(26px);opacity:0}}
+.lx-fab__top.is-hide,.lx-fab.is-open .lx-fab__top{transform:translateY(10px) scale(.6);opacity:0;visibility:hidden;transition:transform .35s var(--ez),opacity .25s,visibility 0s .35s}
+.lx-fab__wrap{position:relative;width:56px;height:56px;border-radius:28px;background:var(--do);box-shadow:0 14px 28px -14px var(--do),0 3px 0 var(--do-den);overflow:hidden;transition:width .6s var(--sp),height .6s var(--sp),border-radius .45s var(--ez),background-color .18s,box-shadow .35s}
+.lx-fab.is-open .lx-fab__wrap{width:min(288px,calc(100vw - 32px));height:var(--h,214px);border-radius:20px;background:#FFFDF8;box-shadow:0 26px 50px -22px rgba(74,11,7,.55),0 0 0 1px rgba(43,26,18,.12)}
+.lx-fab__open{position:absolute;right:0;bottom:0;width:56px;height:56px;display:grid;place-items:center;padding:0;border:0;border-radius:28px;background:none;color:var(--giay);cursor:pointer;transition:opacity .2s,transform .45s var(--sp),visibility 0s}
+.lx-fab__open:hover svg{transform:rotate(-8deg) scale(1.08)}
+.lx-fab__open:active{transform:scale(.9)}
+.lx-fab__open svg{width:26px;height:26px;transition:transform .4s var(--sp)}
+.lx-fab__open svg path{fill:currentColor}
+.lx-fab__open svg circle{fill:var(--do)}
+.lx-fab.is-open .lx-fab__open{opacity:0;transform:scale(.4) rotate(-30deg);visibility:hidden;transition:opacity .15s,transform .3s var(--ez),visibility 0s .3s}
+.lx-fab__top:focus-visible,.lx-fab__p a:focus-visible,.lx-fab__x:focus-visible{outline:2px solid var(--do);outline-offset:2px}
+.lx-fab__open:focus-visible{outline:2px solid var(--giay);outline-offset:-5px}
+.lx-fab__p{position:absolute;right:0;bottom:0;width:min(288px,calc(100vw - 32px));display:flex;flex-direction:column;gap:12px;padding:14px;opacity:0;visibility:hidden;transition:opacity .15s,visibility 0s .15s}
+.lx-fab.is-open .lx-fab__p{opacity:1;visibility:visible;transition:opacity .25s .12s,visibility 0s}
+.lx-fab__p>*{opacity:0;transform:translateY(8px);transition:opacity .2s,transform .4s var(--sp)}
+.lx-fab.is-open .lx-fab__p>*{opacity:1;transform:none;transition-delay:calc(.16s + var(--i) * 50ms)}
+.lx-fab__hd{display:flex;align-items:center;gap:10px}
+.lx-fab__av{width:36px;height:36px;flex:none;border-radius:50%;background:#FFF0E6;display:grid;place-items:center}
+.lx-fab__av svg{width:20px;height:20px;fill:none;stroke:var(--do);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.lx-fab__hd div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.lx-fab__hd b{font-size:.95rem;font-weight:700}
+.lx-fab__hd span{font-size:.78rem;color:#6E5A4A}
+.lx-fab__x{width:36px;height:36px;flex:none;display:grid;place-items:center;align-self:flex-start;margin:-6px -6px 0 0;padding:0;border:0;border-radius:10px;background:none;color:#6E5A4A;cursor:pointer;transition:background-color .2s,color .2s}
+.lx-fab__x:hover{background:rgba(43,26,18,.06);color:var(--muc)}
+.lx-fab__x svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.lx-fab__bb{margin:0;padding:10px 12px;border-radius:4px 14px 14px 14px;background:#FBF3E4;font-size:.86rem;line-height:1.5}
+.lx-fab__acts{display:flex;gap:8px}
+.lx-fab__acts a{flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 10px;border-radius:999px;font-size:.88rem;font-weight:700;text-align:center;text-decoration:none;transition:transform .15s ease-out,background-color .2s}
+.lx-fab__acts a:active{transform:scale(.96)}
+.lx-fab__zl{background:var(--do);color:var(--giay);box-shadow:0 3px 0 var(--do-den)}
+.lx-fab__zl:hover{background:#A3231A}
+.lx-fab__od{background:#fff;color:var(--do);box-shadow:inset 0 0 0 1.5px rgba(181,40,28,.35)}
+.lx-fab__od:hover{background:#FFF0E6}
+.pg--buy:has(.buybar.on) .lx-fab{bottom:calc(84px + env(safe-area-inset-bottom))}
+@media print{.lx-fab{display:none}}
+@media (prefers-reduced-motion:reduce){.lx-fab,.lx-fab *{transition-duration:.01s!important;transition-delay:0s!important;animation:none!important}}
 /* Trang con lanhgift.com: dựng trên các phần @chung của style.css (token, nút, .card, .cta, .foot, hộp đặt hàng). */
 .pg{background:var(--giay)}
 .pg .bar{position:sticky;top:0;--bar-bg:var(--giay);box-shadow:0 1px 0 rgba(43,26,18,.08)}
@@ -373,11 +443,59 @@ html.od-lock,html.od-lock body{overflow:hidden}
   .hero .row .btn{flex:1 1 auto}
 }
 
+/* Lucian UX/UI Prompt #073 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#073
+   Dải thông báo cuộn trên cùng trang con: 5 thông tin thật về giao hàng, COD, doanh nghiệp. Rê chuột hoặc chạm phím thì dừng;
+   đóng thì gấp lại và nhớ trong lượt xem này (bỏ nút chuông mở lại của bản gốc). Giảm chuyển động: không tự cuộn, vẫn bấm › được. */
+.lx-ann{display:grid;grid-template-rows:1fr;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}
+.lx-ann.is-closed{grid-template-rows:0fr}
+.lx-ann.no-anim{transition:none}
+.lx-ann>div{min-height:0;overflow:hidden}
+.lx-ann__bar{position:relative;display:flex;align-items:center;gap:6px;height:48px;padding:0 6px 0 var(--gut);background:var(--do);color:var(--giay);overflow:hidden}
+.lx-ann__bar::after{content:"";position:absolute;top:0;bottom:0;width:90px;left:-110px;background:linear-gradient(100deg,transparent,rgba(244,178,35,.26),transparent);animation:lx-shine 4.5s ease-in-out infinite;pointer-events:none}
+@keyframes lx-shine{0%,60%{transform:translateX(0)}100%{transform:translateX(calc(100vw + 220px))}}
+.lx-ann__msgs{position:relative;flex:1;min-width:0;height:100%;overflow:hidden}
+.lx-ann__m{position:absolute;inset:0;display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none;transform:translateY(100%);opacity:0;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .4s}
+.lx-ann__m.on{transform:none;opacity:1}
+.lx-ann__m.up{transform:translateY(-100%);opacity:0}
+.lx-ann__tag{flex:none;height:22px;padding:0 8px;border-radius:7px;display:inline-flex;align-items:center;background:var(--vang);color:var(--do-den);font-size:.66rem;font-weight:800;letter-spacing:.06em}
+.lx-ann__t{min-width:0;display:flex;flex-direction:column;gap:1px}
+.lx-ann__t b{font-size:.86rem;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lx-ann__t span{font-size:.76rem;line-height:1.25;opacity:.88;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+a.lx-ann__m b{text-decoration:underline;text-underline-offset:3px;text-decoration-color:rgba(246,237,220,.55)}
+.lx-ann__segs{display:flex;gap:3px;flex:none;margin-left:4px}
+.lx-ann__segs i{width:12px;height:3px;border-radius:2px;background:rgba(246,237,220,.3);overflow:hidden}
+.lx-ann__segs i::after{content:"";display:block;height:100%;background:var(--giay);transform-origin:0 50%;transform:scaleX(var(--f,0))}
+.lx-ann__b{position:relative;z-index:1;width:40px;height:40px;flex:none;border:0;padding:0;border-radius:10px;display:grid;place-items:center;background:none;color:inherit;cursor:pointer;transition:background-color .2s,transform .3s cubic-bezier(.34,1.45,.64,1)}
+.lx-ann__b:hover{background:rgba(246,237,220,.16)}
+.lx-ann__b:active{transform:scale(.88)}
+.lx-ann__b:focus-visible,.lx-ann__m:focus-visible{outline:2px solid var(--giay);outline-offset:-3px;border-radius:8px}
+.lx-ann__b svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:560px){.lx-ann__segs,.lx-ann__tag{display:none}.lx-ann__bar{padding-left:16px;gap:2px}}
+@media (prefers-reduced-motion:reduce){.lx-ann,.lx-ann__m{transition:none}.lx-ann__bar::after{display:none}}
+@media print{.lx-ann{display:none}}
+
+/* Lucian UX/UI Prompt #212 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#212
+   Thanh trên trang con: cuộn xuống thì trượt lên nhường chỗ đọc, cuộn lên một chút là hiện lại; vạch đỏ dưới thanh theo phần đã đọc. */
+.pg .bar{transition:transform .38s cubic-bezier(.2,.8,.2,1),color .35s ease-out,background-color .35s ease-out}
+.pg .bar.is-hide{transform:translateY(-110%)}
+.pg .bar:focus-within{transform:none}
+.bar__pg{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--do);transform:scaleX(var(--rd,0));transform-origin:0 50%;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.pg .bar{transition:none}}
+
+/* Lucian UX/UI Prompt #392 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#392
+   Nét bút đỏ vẽ tay, hai lượt hơi lệch, vẽ lần lượt khi cuộn tới: khoanh giá ở trang set, gạch chân ý chính. Bỏ bảng chọn kiểu của bản gốc. */
+.ve{position:relative;white-space:nowrap}
+.ve__s{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.ve__s path{fill:none;stroke:var(--do-son);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ve__s path.b{stroke-width:1.6;opacity:.7}
+.price .ve{margin:0 10px 0 6px}
+
 </style>
 </head>
 <body class="pg">
 <svg id="defs" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><path id="lanh" fill-rule="evenodd" d="M648.5,118.8 637.5,112.2 632,110 622.7,107.8 611.1,107.3 610.6,106.7 598.5,107.8 588.6,110.6 575.9,116.6 566.6,123.2 554.5,134.8 546.2,144.7 536.9,159 528.1,175.5 523.7,187 521.5,190.9 511.6,220 507.2,239.3 505,245.9 500.6,271.7 498.9,272.8 497.8,271.7 497.8,267.9 498.9,261.3 498.9,252.5 500,245.9 502.2,205.7 503.3,199.1 503.3,111.1 495,110 473,110 472.5,110.6 472.5,336.6 473,337.2 502.2,337.2 502.8,336.6 504.4,302 507.7,281.1 507.7,276.7 512.1,256.3 513.2,247.5 519.8,222.2 527.5,199.1 533,185.9 544.6,163.4 552.3,151.8 560.5,141.9 571.5,132 578.7,127.6 588.6,123.8 595.7,122.7 605.6,123.2 612.2,124.9 618.8,128.2 626,133.7 630.9,139.2 635.9,146.3 640.3,154.6 644.7,165.6 645.8,171.1 649.1,180.4 652.4,195.3 652.4,198 653.5,200.2 653.5,203.5 654.6,206.3 654.6,209.6 655.7,212.3 655.7,215.6 677.7,336.6 678.2,337.2 709,337.2 709.6,336.6 692.5,243.1 692.5,239.8 691.4,237.1 691.4,233.8 690.3,231 690.3,227.7 689.2,225 689.2,221.7 688.1,218.9 688.1,215.6 687,212.9 687,209.6 685.9,206.8 685.9,204.1 684.8,201.3 681.5,183.2 676,163.9 669.4,146.9 661.2,132.6 656.2,126ZM234.9,136.4 220,152.4 207.9,169.4 199.1,184.8 190.3,203 179.3,229.9 179.9,231.6 185.4,233.8 188.1,233.2 197.5,209 209,185.4 215.1,174.9 225,160.6 238.7,145.2 249.7,135.9 259.6,129.3 266.2,126 283.8,119.4 295.4,117.2 306.4,116.6 306.9,116.1 315.2,116.1 322.3,117.2 324,118.3 328.9,119.4 335.5,123.2 346.5,133.1 352,140.3 359.7,155.1 365.2,171.6 370.7,196.9 369.6,198 350.9,199.1 339.9,200.2 336.1,201.3 331.7,201.3 327.8,202.4 323.4,202.4 309.7,205.7 301.4,206.8 281.6,212.3 277.2,214.5 265.7,218.4 250.8,225.5 238.7,233.2 229.9,240.4 221.1,249.7 214.5,259.6 210.7,268.4 207.9,279.4 207.9,286.6 207.4,287.1 207.9,297 210.1,305.3 215.1,315.7 220.6,322.9 229.4,330.6 239.3,336.1 248.1,339.4 261.3,342.1 276.1,342.7 286,341.6 298.1,338.3 311.3,332.2 321.2,326.2 331.1,318.5 342.7,306.9 351.5,295.9 359.7,283.3 366.9,269.5 373.5,252.5 375.7,242 377.3,238.7 378.4,239.8 381.7,260.7 382.8,263.5 382.8,266.8 383.9,269.5 383.9,272.8 385,275.6 385,278.9 388.3,294.3 388.3,297.6 389.4,300.3 389.4,303.6 390.5,306.4 390.5,309.7 391.6,312.4 391.6,315.7 394.9,331.1 394.9,334.4 396,337.2 426.8,337.2 427.4,336.1 423,314.6 423,311.3 421.9,308.6 421.9,305.3 420.8,302.5 420.8,299.2 419.7,296.5 419.7,293.2 418.6,290.4 418.6,287.1 417.5,284.4 417.5,281.1 412,253.6 412,250.3 410.9,247.5 410.9,244.2 409.8,241.5 409.8,238.2 408.7,235.4 408.7,232.1 407.6,229.4 407.6,226.1 396.6,167.8 391.1,150.2 385.6,139.2 377.3,127.6 371.3,121.6 363,115.5 354.2,111.1 344.3,107.8 335,106.7 331.7,105.6 319.6,105.6 319,105.1 303.1,105.6 299.2,106.7 288.8,107.8 273.9,112.2 263.5,116.6 249.2,124.9ZM372.4,209.6 371.3,225 368.5,236.5 368.5,239.3 363,256.3 355.3,272.8 344.9,288.8 340.5,294.3 327.3,307.5 319,313.5 308.6,319 297.6,322.3 284.9,322.9 284.4,322.3 278.3,322.3 276.1,321.2 270.1,320.1 262.4,316.3 256.3,311.9 249.7,304.7 245.9,298.1 242.6,287.7 242,278.9 243.1,269 245.9,259.6 250.3,251.4 256.3,243.7 265.7,235.4 277.8,227.7 288.8,222.8 309.1,216.2 316.8,215.1 324.5,212.9 344.3,210.7 348.7,209.6 358.6,209.6 366.9,208.5 371.3,208.5ZM0.6,23.7 0,24.2 0,336.6 0.6,337.2 179.9,337.2 180.4,336.6 180.4,327.3 179.9,326.7 34.7,326.7 33.6,325.6 33.6,23.7 33,23.1ZM264,13.2 260.7,19.8 260.7,24.8 263.5,30.8 269,36.9 282.7,47.9 332.8,79.8 333.9,79.8 335.5,78.1 337.7,74.3 335.5,70.4 298.7,27 291,19.3 283.8,13.8 278.3,11 271.7,9.9 267.3,11ZM764,0 763.5,0.6 763.5,37.4 762.9,38 762.9,336.6 763.5,337.2 792.6,337.2 793.2,336.6 794.8,301.4 795.9,297.6 798.1,276.7 801.4,258.5 802.5,255.8 802.5,253 803.6,250.3 803.6,247 811.3,217.8 812.4,216.2 817.9,198.6 825.6,180.4 835,162.8 848.2,144.7 853.7,138.6 861.9,131.5 870.7,126 876.2,123.8 882.8,122.1 891.6,121.6 898.2,122.7 904.8,124.9 912.5,129.8 919.7,137 924.6,143.6 930.7,154.6 935.1,165.6 939.5,179.9 943.9,199.7 943.9,203 946.1,211.8 946.1,215.1 950.5,236.5 950.5,239.8 951.6,242.6 951.6,245.9 952.7,248.6 952.7,251.9 953.8,254.7 953.8,258 968.1,336.6 968.6,337.2 999.4,337.2 1000,336.6 999.4,331.1 993.9,303.6 993.9,300.3 992.8,297.6 992.8,294.3 991.7,291.5 991.7,288.2 990.6,285.5 990.6,282.2 989.5,279.4 989.5,276.1 988.4,273.4 988.4,270.1 981.8,236.5 981.8,233.2 980.7,230.5 980.7,227.2 979.6,224.4 979.6,221.1 978.5,218.4 978.5,215.1 977.4,212.3 977.4,209 973,190.3 973,187.6 966.4,163.9 958.7,145.2 954.3,137 947.7,127.6 938.4,118.3 931.2,113.3 921.3,108.9 914.7,107.8 912.5,106.7 901.5,106.2 901,105.6 888.9,106.7 886.7,107.8 880.6,108.9 869.6,113.9 860.3,119.9 854.2,124.9 840.5,139.2 832.8,149.6 825.1,162.3 815.2,182.1 811.9,190.3 800.9,222.8 800.9,225 795.4,244.8 790.4,272.3 788.8,272.8 787.7,271.7 789.9,239.8 790.4,239.3 790.4,230.5 791.5,223.3 791.5,214.5 792.6,207.9 792.6,199.1 793.7,192 793.7,1.1 785.5,0Z"/><radialGradient id="g-mai" cx=".5" cy=".92" r=".95"><stop offset="0" stop-color="#FFF3B8"/><stop offset=".42" stop-color="#FBCB3C"/><stop offset="1" stop-color="#EE9A12"/></radialGradient><path id="mai-p" d="M0,-3C-8,-6 -11,-15 -6,-21C-3,-24 3,-24 6,-21C11,-15 8,-6 0,-3Z"/><g id="mai"><g fill="url(#g-mai)"><use href="#mai-p"/><use href="#mai-p" transform="rotate(72)"/><use href="#mai-p" transform="rotate(144)"/><use href="#mai-p" transform="rotate(216)"/><use href="#mai-p" transform="rotate(288)"/></g><circle r="5.5" fill="#E2601A"/><path d="M0,0V-11M0,0L8,-7M0,0L10.5,3M0,0L5,9.5M0,0L-5,9.5M0,0L-10.5,3M0,0L-8,-7" stroke="#B83A12" stroke-width="1.3" stroke-linecap="round"/><g fill="#7E2508"><circle cy="-11" r="1.5"/><circle cx="8" cy="-7" r="1.5"/><circle cx="10.5" cy="3" r="1.5"/><circle cx="5" cy="9.5" r="1.5"/><circle cx="-5" cy="9.5" r="1.5"/><circle cx="-10.5" cy="3" r="1.5"/><circle cx="-8" cy="-7" r="1.5"/></g></g><g id="mai-nu"><circle r="6.5" fill="#F8C12C"/><circle cx="-2" cy="-2" r="2" fill="#FFE8A0"/><path d="M-6.5,1C-5,8 5,8 6.5,1L0,5.5Z" fill="#4E8A4F"/></g></defs></svg>
 <a class="skip" href="#noi-dung">Bỏ qua, đến nội dung chính</a>
+<div class="lx-ann"><div><div class="lx-ann__bar" role="region" aria-label="Thông báo của Lành" aria-roledescription="dải thông báo cuộn"><div class="lx-ann__msgs" aria-live="off"><div class="lx-ann__m on"><span class="lx-ann__tag">GIAO NHANH</span><span class="lx-ann__t"><b>Nội thành TP.HCM giao trong 4 giờ</b><span>Ship 30.000đ, mỗi phí cho tối đa 2 giỏ</span></span></div><div class="lx-ann__m" aria-hidden="true"><span class="lx-ann__tag">COD</span><span class="lx-ann__t"><b>Thanh toán khi nhận hàng</b><span>Trả tiền quà và phí ship lúc nhận</span></span></div><div class="lx-ann__m" aria-hidden="true"><span class="lx-ann__tag">DOANH NGHIỆP</span><span class="lx-ann__t"><b>Quà Tết doanh nghiệp từ 20 set</b><span>In logo lên hộp, có hoá đơn VAT</span></span></div><div class="lx-ann__m" aria-hidden="true"><span class="lx-ann__tag">ĐI TỈNH</span><span class="lx-ann__t"><b>Giao các tỉnh thành trong 3 ngày</b><span>Phí ship đi tỉnh 50.000đ</span></span></div><div class="lx-ann__m" aria-hidden="true"><span class="lx-ann__tag">ĐẶT SỚM</span><span class="lx-ann__t"><b>7 ngày trước Tết, phí ship cao hơn</b><span>Lành báo phí ship khi xác nhận đơn</span></span></div></div><span class="lx-ann__segs" aria-hidden="true"></span><button class="lx-ann__b lx-ann__nx" type="button" aria-label="Thông báo tiếp theo"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M5 3l4 4-4 4"/></svg></button><button class="lx-ann__b lx-ann__x" type="button" aria-label="Đóng dải thông báo"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 3.5l7 7M10.5 3.5l-7 7"/></svg></button></div></div></div>
 <header class="bar is-solid" data-ink="dark"><a class="bar__logo" href="/" aria-label="Lành Gift, trang chủ"><svg viewBox="0 0 1000 343" aria-hidden="true" focusable="false"><use href="#lanh"/></svg></a><div class="bar__end"><nav aria-label="Trang"><ul class="bar__nav"><li><a href="/gio-qua-tet-sum-vay">Set Sum Vầy</a></li><li><a href="/gio-qua-tet-doan-vien">Set Đoàn Viên</a></li><li><a href="/qua-tet-doanh-nghiep" aria-current="page">Quà doanh nghiệp</a></li><li><a href="/gio-qua-tet-gom-nhung-gi">Giỏ quà Tết gồm gì</a></li></ul></nav><a class="btn btn--sm btn--red" href="https://zalo.me/0976723931" data-order data-src="qua-tet-doanh-nghiep-thanh-tren">Đặt quà Tết</a></div></header>
 <nav class="crumbs" aria-label="Bạn đang ở"><ol><li><a href="/">Lành Gift</a></li><li aria-current="page">Quà Tết doanh nghiệp</li></ol></nav>
 <main id="noi-dung">
@@ -386,7 +504,7 @@ html.od-lock,html.od-lock body{overflow:hidden}
   <div>
     <p class="eyebrow">Quà Tết doanh nghiệp 2027</p>
     <h1 id="h1">Quà Tết doanh nghiệp, mang tên công ty bạn</h1>
-    <p class="lede">Giỏ quà Tết mộc mạc nhưng chỉn chu, phù hợp để biếu tặng đồng nghiệp và đối tác trong dịp năm mới. Đơn từ 20 set, có xuất hoá đơn VAT, hộp in logo làm xong trong 3 ngày, giao đến các tỉnh thành trên cả nước.</p>
+    <p class="lede">Giỏ quà Tết mộc mạc nhưng chỉn chu, phù hợp để biếu tặng đồng nghiệp và đối tác trong dịp năm mới. <span class="ve" data-ve="u">Đơn từ 20 set</span>, có xuất <span class="ve" data-ve="u">hoá đơn VAT</span>, hộp in logo làm xong trong 3 ngày, giao đến các tỉnh thành trên cả nước.</p>
     <div class="row"><a class="btn btn--red" href="https://zalo.me/0976723931" target="_blank" rel="noopener">Nhắn Zalo nhận báo giá</a><a class="btn" href="https://zalo.me/0976723931" data-order data-src="qua-tet-doanh-nghiep">Đặt online</a></div>
     <ul class="ticks"><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>Từ 20 set</li><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>Xuất hoá đơn VAT</li><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>In logo, xong trong 3 ngày</li><li><svg viewBox="-9 -9 18 18" aria-hidden="true" focusable="false"><use href="#mai-nu"/></svg>Giao toàn quốc</li></ul>
   </div>
@@ -475,7 +593,12 @@ html.od-lock,html.od-lock body{overflow:hidden}
       </footer>
     </form>
     <div class="od__done" id="od-done" hidden tabindex="-1">
-      <svg class="od__ok" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29"/><path d="M19 33l9 9 17-19"/></svg>
+      <!-- Lucian UX/UI Prompt #342 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#342 -->
+      <div class="od-gift" aria-hidden="true">
+        <div class="od-gift__ray"></div>
+        <div class="od-gift__card"><small>Lành gửi lời chúc</small><b>Tết an lành</b></div>
+        <div class="od-gift__box"><span class="od-gift__body"></span><span class="od-gift__lid"><svg class="od-gift__bow" viewBox="0 0 96 44"><path d="M48 30 C30 4 6 6 10 22 C13 34 34 32 48 30 Z" fill="#F4B223" stroke="#C98A22" stroke-width="2"/><path d="M48 30 C66 4 90 6 86 22 C83 34 62 32 48 30 Z" fill="#F4B223" stroke="#C98A22" stroke-width="2"/><path d="M44 30 L34 44 M52 30 L62 44" stroke="#F4B223" stroke-width="6" stroke-linecap="round"/><circle cx="48" cy="30" r="7" fill="#E09C14"/></svg></span></div>
+      </div>
       <h3 class="od__ttl">Lành đã nhận đơn</h3>
       <p class="od__code">Mã đơn <b id="od-code"></b></p>
       <dl class="od__bill" id="od-bill"></dl>
@@ -496,6 +619,15 @@ const SHIP={hcm:30000,tinh:50000},ZN={hcm:'Nội thành TP.HCM',tinh:'Tỉnh kh�
 const PEAK=[Date.parse('2027-01-30T00:00:00+07:00'),Date.parse('2027-02-11T00:00:00+07:00')],peak=()=>{const t=Date.now();return t>=PEAK[0]&&t<PEAK[1]};
 const ZALO='https://zalo.me/0976723931',MEM='lanh-order-v1';
 const form=d.getElementById('od-form'),done=d.getElementById('od-done'),total=d.getElementById('od-total'),fail=d.getElementById('od-fail');
+// Lucian UX/UI Prompt #342 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#342 — hộp quà tự mở khi đơn gửi xong
+const gift=d.querySelector('.od-gift');
+function unwrap(){if(!gift)return;gift.classList.remove('is-open');gift.querySelectorAll('.od-gift__sp').forEach(s=>s.remove());
+  setTimeout(()=>{if(done.hidden)return;gift.classList.add('is-open');
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    for(let i=0;i<18;i++){const s=d.createElement('span'),a=-Math.PI/2+(Math.random()-.5)*2.6,r=60+Math.random()*80;s.className='od-gift__sp';
+      s.style.setProperty('--dx',(Math.cos(a)*r).toFixed(0)+'px');s.style.setProperty('--dy',(Math.sin(a)*r).toFixed(0)+'px');
+      s.style.background=['#F4B223','#FFFDF8','#D23A22','#F28C1E'][i%4];s.style.animationDelay=(.7+Math.random()*.2).toFixed(2)+'s';
+      gift.appendChild(s);setTimeout(()=>s.remove(),2200)}},matchMedia('(prefers-reduced-motion: reduce)').matches?0:450)}
 const qty=d.getElementById('od-qty'),go=form.querySelector('.od__go'),root=d.documentElement,note=d.getElementById('od-sumnote');
 const vnd=n=>new Intl.NumberFormat('vi-VN').format(n)+'đ';
 let src='',opener=null,busy=false;
@@ -538,7 +670,7 @@ function recall(){try{const v=JSON.parse(localStorage.getItem(MEM)||'null');if(!
   if(!zoneOf()&&SHIP[v.zone]){const r=form.querySelector('input[name=zone][value="'+v.zone+'"]');if(r)r.checked=true}}catch(e){}}
 
 function open(preset,from,el){
-  src=from||'';opener=el||d.activeElement;form.hidden=false;done.hidden=true;fail.hidden=true;go.disabled=false;go.classList.remove('is-busy');
+  src=from||'';opener=el||d.activeElement;form.hidden=false;done.hidden=true;if(gift)gift.classList.remove('is-open');fail.hidden=true;go.disabled=false;go.classList.remove('is-busy');
   if(preset&&SETS[preset]){const r=form.querySelector('input[name=set][value="'+preset+'"]');if(r)r.checked=true}
   if(peak())form.querySelectorAll('[data-zp]').forEach(e=>e.textContent=PEAKZ[e.dataset.zp]);
   recall();sum();['set','qty','zone','name','phone','address'].forEach(k=>mark(k,''));
@@ -590,7 +722,7 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(busy)return;fail.
       ['Người nhận',body.p_name],['Điện thoại',body.p_phone.replace(/(\d{4})(\d{3})(\d{3})/,'$1 $2 $3')],['Giao đến',body.p_address+' ('+ZN[body.p_zone]+')']];
     if(body.p_note)rows.push(['Ghi chú',body.p_note]);
     const bill=d.getElementById('od-bill');bill.textContent='';rows.forEach(([a,b])=>{const dt=d.createElement('dt'),dd=d.createElement('dd');dt.textContent=a;dd.textContent=b;bill.append(dt,dd)});
-    form.hidden=true;done.hidden=false;done.focus({preventScroll:true});f.note.value='';qty.value=1;form.querySelectorAll('input[name=set]').forEach(r=>r.checked=false);
+    form.hidden=true;done.hidden=false;done.focus({preventScroll:true});unwrap();f.note.value='';qty.value=1;form.querySelectorAll('input[name=set]').forEach(r=>r.checked=false);
   }catch(err){oops('Mạng đang chập chờn nên đơn chưa gửi được. Bạn thử lại, hoặc <a href="'+ZALO+'" target="_blank" rel="noopener">nhắn Zalo</a> để Lành ghi đơn giúp.')}
   finally{clearTimeout(tm);busy=false;go.disabled=false;go.classList.remove('is-busy');go.removeAttribute('aria-label')}
 });
@@ -599,6 +731,120 @@ window.__lanhOrder={open,close};
 
 </script>
 <script>
+
+</script>
+<script>
+/* Hiệu ứng chuyển từ Lucian UX/UI Prompt, chỉnh theo nhận diện Mùi Lành (chữ, màu, nội dung thật của Lành).
+   Lucian UX/UI Prompt #450 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#450
+   Lucian UX/UI Prompt #073 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#073
+   Lucian UX/UI Prompt #212 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#212
+   Lucian UX/UI Prompt #392 · MIT License (c) 2026 Seokwoooo · https://lucianlabs.dev/uxui-prompt/#392 */
+(()=>{
+const d=document,w=window,ZALO='https://zalo.me/0976723931';
+const rmq=w.matchMedia('(prefers-reduced-motion: reduce)'),rm=()=>rmq.matches;
+const sub=d.body.classList.contains('pg');
+const maxY=()=>Math.max(1,d.documentElement.scrollHeight-w.innerHeight);
+
+/* ---------- #450 Về đầu trang + hỏi Lành qua Zalo ---------- */
+const fab=d.createElement('div');fab.className='lx-fab'+(sub?'':' lx-fab--home');
+fab.innerHTML=
+ '<button type="button" class="lx-fab__top" aria-label="Về đầu trang"><svg class="rg" viewBox="0 0 44 44" aria-hidden="true"><circle class="tr" cx="22" cy="22" r="19.5"/><circle class="pr" cx="22" cy="22" r="19.5"/></svg><svg class="ar" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 14.5V4M4.5 8 9 3.5 13.5 8"/></svg></button>'+
+ '<div class="lx-fab__wrap">'+
+  '<button type="button" class="lx-fab__open" aria-label="Hỏi Lành qua Zalo" aria-expanded="false" aria-controls="lx-fab-p"><svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 3.5c5.8 0 10.5 3.9 10.5 8.8s-4.7 8.8-10.5 8.8c-1.2 0-2.4-.2-3.5-.5L4.6 22.4l1.3-4.3C4 16.5 2.5 14.5 2.5 12.3 2.5 7.4 7.2 3.5 13 3.5z"/><circle cx="8.6" cy="12.4" r="1.4"/><circle cx="13" cy="12.4" r="1.4"/><circle cx="17.4" cy="12.4" r="1.4"/></svg></button>'+
+  '<div class="lx-fab__p" id="lx-fab-p" role="dialog" aria-label="Hỏi Lành">'+
+   '<div class="lx-fab__hd" style="--i:0"><span class="lx-fab__av" aria-hidden="true"><svg viewBox="0 0 20 20"><rect x="3" y="8" width="14" height="9" rx="1.6"/><path d="M2.5 5.5h15v3h-15zM10 5.5V17M10 5.5C8.6 3 5.6 2.6 5.8 4.4c.2 1.4 2.6 1.1 4.2 1.1M10 5.5c1.4-2.5 4.4-2.9 4.2-1.1-.2 1.4-2.6 1.1-4.2 1.1"/></svg></span><div><b>Hỏi Lành qua Zalo</b><span>Chọn set, quà doanh nghiệp</span></div><button type="button" class="lx-fab__x" aria-label="Đóng"><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8"/></svg></button></div>'+
+   '<p class="lx-fab__bb" style="--i:1">Nhắn Lành số lượng, set quà và nơi giao để nhận catalogue và báo giá.</p>'+
+   '<div class="lx-fab__acts" style="--i:2"><a class="lx-fab__zl" href="'+ZALO+'" target="_blank" rel="noopener">Nhắn Zalo</a><a class="lx-fab__od" href="'+ZALO+'" data-order data-src="nut-noi">Đặt quà Tết</a></div>'+
+  '</div>'+
+ '</div>';
+d.body.appendChild(fab);
+const top=fab.querySelector('.lx-fab__top'),wrap=fab.querySelector('.lx-fab__wrap'),ob=fab.querySelector('.lx-fab__open'),pn=fab.querySelector('.lx-fab__p'),px=fab.querySelector('.lx-fab__x');
+pn.inert=true;
+const shelf=d.getElementById('bo-suu-tap');
+function fabTick(){const y=w.scrollY;
+  top.style.setProperty('--p',Math.min(1,y/maxY()).toFixed(3));
+  // trang con: hiện khi đã cuộn qua phần đầu; trang chủ: chỉ hiện từ Bộ sưu tập trở xuống (sau hành trình và giỏ 3D để không che chỗ kéo, bấm hộp)
+  const on=sub?y>420:!!shelf&&shelf.getBoundingClientRect().top<w.innerHeight*.8;
+  if(on!==fab.classList.contains('is-on')){fab.classList.toggle('is-on',on);if(!on&&fab.classList.contains('is-open'))fabClose(false)}
+  top.classList.toggle('is-hide',y<420)}
+function fabOpen(){wrap.style.setProperty('--h',pn.offsetHeight+'px');fab.classList.add('is-open');ob.setAttribute('aria-expanded','true');pn.inert=false;
+  setTimeout(()=>{if(fab.classList.contains('is-open'))fab.querySelector('.lx-fab__zl').focus({preventScroll:true})},rm()?0:320)}
+function fabClose(back){fab.classList.remove('is-open');ob.setAttribute('aria-expanded','false');pn.inert=true;if(back)ob.focus({preventScroll:true})}
+ob.addEventListener('click',fabOpen);
+px.addEventListener('click',()=>fabClose(true));
+pn.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();fabClose(true)}});
+d.addEventListener('pointerdown',e=>{if(fab.classList.contains('is-open')&&!fab.contains(e.target)&&!e.target.closest('dialog'))fabClose(false)});
+top.addEventListener('click',()=>{top.classList.remove('is-fly');void top.offsetWidth;top.classList.add('is-fly');
+  w.scrollTo({top:0,behavior:rm()?'auto':'smooth'});const h=d.getElementById('noi-dung');if(h){h.setAttribute('tabindex','-1');setTimeout(()=>h.focus({preventScroll:true}),rm()?0:600)}});
+
+/* ---------- #073 Dải thông báo cuộn (chỉ trang con) ---------- */
+const ann=d.querySelector('.lx-ann');
+if(ann){
+  const KEY='lanh-ann-off',msgs=[...ann.querySelectorAll('.lx-ann__m')],bar=ann.querySelector('.lx-ann__bar'),box=ann.querySelector('.lx-ann__msgs');
+  const segs=ann.querySelector('.lx-ann__segs'),nx=ann.querySelector('.lx-ann__nx'),x=ann.querySelector('.lx-ann__x');
+  const bars=msgs.map(()=>{const i=d.createElement('i');segs.appendChild(i);return i});
+  let cur=0,el=0,last=performance.now(),paused=false,closed=false;const DUR=3800;
+  function show(i){const prev=msgs[cur];cur=(i+msgs.length)%msgs.length;
+    msgs.forEach((m,k)=>{m.classList.toggle('on',k===cur);m.classList.toggle('up',m===prev&&k!==cur);m.setAttribute('aria-hidden',String(k!==cur));m.inert=k!==cur});
+    setTimeout(()=>prev.classList.remove('up'),600);
+    bars.forEach((b,k)=>b.style.setProperty('--f',k<cur?1:0));el=0}
+  let off=false;try{off=sessionStorage.getItem(KEY)==='1'}catch(e){}
+  if(off){closed=true;ann.classList.add('is-closed','no-anim');ann.firstElementChild.inert=true}
+  (function loop(now){if(closed)return;const dt=now-last;last=now;
+    if(!paused&&!rm()&&!d.hidden){el+=dt;bars[cur].style.setProperty('--f',Math.min(1,el/DUR).toFixed(3));if(el>=DUR)show(cur+1)}
+    requestAnimationFrame(loop)})(last);
+  bar.addEventListener('pointerenter',()=>{paused=true});
+  bar.addEventListener('pointerleave',()=>{paused=bar.contains(d.activeElement)});
+  bar.addEventListener('focusin',()=>{paused=true});
+  bar.addEventListener('focusout',e=>{if(!bar.contains(e.relatedTarget))paused=false});
+  nx.addEventListener('click',()=>{box.setAttribute('aria-live','polite');show(cur+1)});
+  x.addEventListener('click',()=>{closed=true;ann.classList.add('is-closed');ann.firstElementChild.inert=true;try{sessionStorage.setItem(KEY,'1')}catch(e){}
+    const l=d.querySelector('.bar__logo');if(l)l.focus({preventScroll:true})});
+  show(0);
+}
+
+/* ---------- #212 Thanh trên ẩn khi cuộn xuống, hiện khi cuộn lên (chỉ trang con) ---------- */
+const hb=sub&&d.querySelector('.bar');
+let hy=w.scrollY,acc=0;
+if(hb){const pg=d.createElement('span');pg.className='bar__pg';pg.setAttribute('aria-hidden','true');hb.appendChild(pg)}
+function barTick(){if(!hb)return;const y=w.scrollY,dy=y-hy;hy=y;
+  acc=(dy>0)===(acc>0)?acc+dy:dy;
+  const start=(ann&&!ann.classList.contains('is-closed')?ann.offsetHeight:0)+80;
+  if(y<start||hb.matches(':focus-within'))hb.classList.remove('is-hide');
+  else if(acc>8)hb.classList.add('is-hide');
+  else if(acc<-6)hb.classList.remove('is-hide');
+  hb.style.setProperty('--rd',Math.min(1,y/maxY()).toFixed(4))}
+
+let ticking=false;
+w.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;fabTick();barTick()})},{passive:true});
+w.addEventListener('resize',()=>{fabTick();barTick()},{passive:true});
+fabTick();barTick();
+
+/* ---------- #392 Nét bút vẽ tay nhấn ý chính (chỉ trang con) ---------- */
+const marks=[...d.querySelectorAll('.ve')];
+if(marks.length){
+  const NS='http://www.w3.org/2000/svg',j=n=>(Math.random()-.5)*2*n;
+  function shape(r,type,pass){const {x,y,w:ww,h}=r,s=pass?1.6:1;
+    if(type==='o'){const cx=x+ww/2,cy=y+h/2,rx=ww/2+7,ry=h/2+5,a0=-2.2+j(.3),out=[];
+      for(let i=0;i<=26;i++){const a=a0+(i/26)*(Math.PI*2+.6),k=1+j(.05)+i*.004*s;out.push((cx+Math.cos(a)*rx*k).toFixed(1)+' '+(cy+Math.sin(a)*ry*k).toFixed(1))}
+      return 'M'+out.join(' L')}
+    return 'M'+(x-2)+' '+(y+h-1+j(1.5))+' Q'+(x+ww/2)+' '+(y+h+3*s+j(2))+' '+(x+ww+3)+' '+(y+h-2+j(1.5))}
+  function draw(m,delay,anim){let svg=m.querySelector('svg.ve__s');if(!svg){svg=d.createElementNS(NS,'svg');svg.setAttribute('class','ve__s');svg.setAttribute('aria-hidden','true');m.appendChild(svg)}
+    svg.textContent='';const type=m.dataset.ve==='o'?'o':'u',r=type==='o'?{x:2,y:-2,w:m.offsetWidth-4,h:m.offsetHeight+4}:{x:0,y:4,w:m.offsetWidth,h:m.offsetHeight-8};
+    [0,1].forEach(pass=>{const p=d.createElementNS(NS,'path');p.setAttribute('d',shape(r,type,pass));if(pass)p.setAttribute('class','b');svg.appendChild(p);
+      const len=p.getTotalLength();p.style.strokeDasharray=len+' '+len;
+      if(!anim||rm()||!p.animate){p.style.strokeDashoffset=0;return}
+      p.style.strokeDashoffset=len;
+      const a=p.animate([{strokeDashoffset:len},{strokeDashoffset:0}],{duration:380+len*1.4,delay:delay+pass*200,easing:'cubic-bezier(.55,.1,.35,1)',fill:'both'});
+      a.onfinish=()=>{p.style.strokeDashoffset=0}})}
+  const seen=new Set();
+  const io='IntersectionObserver' in w?new IntersectionObserver(es=>{es.forEach(e=>{if(!e.isIntersecting)return;io.unobserve(e.target);
+    const group=marks.filter(m=>m.parentElement===e.target.parentElement&&!seen.has(m));
+    group.forEach((m,i)=>{seen.add(m);io.unobserve(m);draw(m,i*420,true)})})},{threshold:.9}):null;
+  marks.forEach(m=>io?io.observe(m):draw(m,0,false));
+  let rw=w.innerWidth;w.addEventListener('resize',()=>{if(w.innerWidth===rw)return;rw=w.innerWidth;seen.forEach(m=>draw(m,0,false))},{passive:true});
+}
+})();
 
 </script>
 </body>
