@@ -1,15 +1,38 @@
-# Cơ sở dữ liệu đơn hàng (Supabase, dự án `lanh-gift-orders`)
+# Cơ sở dữ liệu bán hàng (Supabase, dự án `lanh-gift-orders`)
 
-- Bảng `public.orders`: bật RLS, không có policy, trình duyệt không đọc/ghi trực tiếp.
-- `public.place_order(...)`: cổng nhận đơn duy nhất của trang. Tự tính giá ở máy chủ
-  (Set Sum Vầy 399.000đ, Set Đoàn Viên 599.000đ), kiểm tra tên, SĐT di động 10 số, địa chỉ,
-  chống bấm gửi trùng (3 phút) và chống gửi ồ ạt. Nhận thêm `p_zone` (`hcm` nội thành TP.HCM, `tinh` tỉnh khác)
-  và tính phí ship qua `private.ship_fee`: mỗi 2 giỏ một phí, 30.000đ nội thành, 50.000đ đi tỉnh;
-  cao điểm Tết (30/01 đến hết 10/02/2027, giờ Việt Nam) để trống, Lành báo khi xác nhận.
-- Cột `zone`, `ship_fee`, `cod_total` (tự tính = tiền quà + phí ship, trống khi chưa có phí ship).
-- `public.bo_orders`, `public.bo_set_status`, `public.bo_set_ship` (nhập phí ship): chỉ chạy khi có khoá bí mật `BO_KEY`
-  (chỉ lưu trong biến môi trường Vercel, không có trong repo).
-- `public.ping()`: lịch chạy hằng ngày gọi để dự án miễn phí không bị tạm dừng.
+Mọi bảng bật RLS, không có policy: trình duyệt không đọc, ghi trực tiếp. Trang web chỉ gọi `place_order`;
+trang quản lý gọi các hàm `bo2_*` qua máy chủ Vercel (`/api/bo`), hàm nào cũng kiểm khoá bí mật `BO_KEY`
+(chỉ lưu trong biến môi trường Vercel, không có trong repo).
 
-Đổi giá: sửa hàm `private.set_price` trong Supabase và hai con số trong hộp đặt hàng (`order.js`).
-Đổi phí ship hoặc ngày cao điểm: sửa `private.ship_fee` và hằng `SHIP`, `PEAK` trong `order.js`.
+## Bảng
+
+- `orders`: đơn từ web và đơn nhập tay.
+  - Kế hoạch: `total` (tiền quà), `ship_fee` (phí ship báo khách), `cod_total` (tự tính = tiền quà + phí ship).
+  - Thực tế khi đối soát: `got_amount` (khách trả thực tế), `ship_cost` (phí trả hãng, gồm phí thu hộ), `received_at`.
+  - `items`: các dòng hàng `[{code, name, qty, price}]`; đơn nhiều set có `set_code = 'nhieu-set'`.
+  - `campaign_id`, `channel` (nguồn đơn), `ref` (utm hoặc trang dẫn tới), `origin` (`web` hoặc `tay`),
+    `pay_method` (`cod`, `ck`, `tien-mat`), `carrier`, `recon_note`.
+  - Trạng thái: `moi`, `da-xac-nhan`, `dang-giao`, `da-giao`, `da-nhan-tien`, `huy`, `hoan-hang`.
+- `campaigns`: chiến dịch (`draft`, `running`, `closed`, `settled`), ngày bán, mục tiêu, ngân sách theo loại chi, set quà.
+  Đơn web tự vào chiến dịch `running` bắt đầu muộn nhất. Chiến dịch `settled` khoá sửa đơn và chi.
+- `expenses`: khoản chi theo chiến dịch, loại `nhap`, `baobi`, `quangcao`, `vanchuyen`, `khac` (cùng mã với Sơn Nga Family).
+- `sources`: danh sách nguồn đơn (Web, Google, Google Ads, Facebook, Zalo, Instagram, TikTok, Doanh nghiệp, Người quen,
+  Bạn bè giới thiệu, Khách cũ, Khác). Chỉ ẩn, không xoá.
+- `audit`: nhật ký mọi lần ghi từ trang quản lý (dùng cho đối chiếu và đồng bộ giai đoạn 2).
+
+## Hàm
+
+- `place_order(...)`: cổng nhận đơn của trang. Tự tính giá ở máy chủ (Set Sum Vầy 399.000đ, Set Đoàn Viên 599.000đ),
+  kiểm tra tên, SĐT, địa chỉ, chống gửi trùng (3 phút) và gửi ồ ạt. Phí ship qua `private.ship_fee`: mỗi 2 giỏ một phí,
+  30.000đ nội thành TP.HCM, 50.000đ đi tỉnh; cao điểm Tết (30/01 đến hết 10/02/2027) để trống, Lành báo khi xác nhận.
+  Nhận `p_channel` (chỉ web, google, google-ads, facebook, zalo, instagram, tiktok) và `p_ref`.
+- `bo2_data`: toàn bộ dữ liệu cho dashboard. `bo2_order_save`: tạo đơn nhập tay hoặc sửa đơn, đổi trạng thái, đối soát.
+  Kế hoạch (hàng, phí ship báo khách) khoá khi đơn đã nhận tiền hoặc hoàn hàng.
+  `bo2_expense_save`, `bo2_expense_delete`, `bo2_campaign_save`, `bo2_sources_save`.
+- `bo_orders`, `bo_set_status`, `bo_set_ship`: dùng cho trang quản lý bản cũ, giữ để không gãy khi chuyển.
+- `ping()`: lịch chạy hằng ngày gọi để dự án miễn phí không bị tạm dừng.
+
+Lịch sử thay đổi: `2026-11-27-dashboard-gd1.sql` (chiến dịch, nguồn đơn, đối soát, chi phí).
+
+Đổi giá web: sửa `private.set_price` và hai con số trong hộp đặt hàng (`order.js`).
+Đổi phí ship hoặc ngày cao điểm: sửa `private.ship_fee`, hằng `SHIP`, `PEAK` trong `order.js` và trong `quan-ly/app.js`.

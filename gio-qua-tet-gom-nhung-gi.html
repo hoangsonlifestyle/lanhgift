@@ -507,6 +507,19 @@ const form=d.getElementById('od-form'),done=d.getElementById('od-done'),total=d.
 const qty=d.getElementById('od-qty'),go=form.querySelector('.od__go'),root=d.documentElement,note=d.getElementById('od-sumnote');
 const vnd=n=>new Intl.NumberFormat('vi-VN').format(n)+'đ';
 let src='',opener=null,busy=false;
+// Nguồn đơn cho dashboard: utm_*, mã quảng cáo (gclid, fbclid) hoặc trang dẫn tới; nhớ 30 ngày để khách quay lại vẫn đúng nguồn.
+const CH=(()=>{const K='lanh-ref-v1',now=Date.now(),hit=(re,v)=>re.test(v);
+  try{const p=new URLSearchParams(location.search),us=(p.get('utm_source')||'').toLowerCase(),um=(p.get('utm_medium')||'').toLowerCase(),uc=p.get('utm_campaign')||'';
+    let ch='',ref=[us,um,uc].filter(Boolean).join(' / ');
+    if(p.get('gclid')||p.get('gbraid')||p.get('wbraid')||(hit(/google/,us)&&hit(/cpc|ppc|paid|ads/,um))){ch='google-ads';ref=ref||'google / ads'}
+    else if(us)ch=hit(/google/,us)?'google':hit(/facebook|^fb$|meta/,us)?'facebook':hit(/instagram|^ig$/,us)?'instagram':hit(/tiktok/,us)?'tiktok':hit(/zalo/,us)?'zalo':'web';
+    else if(p.get('fbclid')){ch='facebook';ref='facebook'}
+    else{let h='';try{h=d.referrer?new URL(d.referrer).hostname.replace(/^www\./,''):''}catch(e){}
+      if(h&&h!==location.hostname.replace(/^www\./,'')){ref=h;ch=hit(/(^|\.)google\./,h)?'google':hit(/(^|\.)(facebook\.com|fb\.com|fb\.me)$/,h)?'facebook':hit(/(^|\.)instagram\.com$/,h)?'instagram':hit(/(^|\.)tiktok\.com$/,h)?'tiktok':hit(/(^|\.)zalo\.(me|vn)$|zaloapp\.com$/,h)?'zalo':'web'}}
+    if(ch){try{localStorage.setItem(K,JSON.stringify({ch,ref:ref.slice(0,120),t:now}))}catch(e){}return {ch,ref:ref.slice(0,120)}}
+    const s=JSON.parse(localStorage.getItem(K)||'null');if(s&&s.ch&&now-s.t<30*864e5)return {ch:s.ch,ref:s.ref||''};
+  }catch(e){}
+  return {ch:'web',ref:''}})();
 
 const q=()=>{const n=parseInt(String(qty.value).replace(/\D/g,''),10);return isNaN(n)?0:n};
 const setOf=()=>{const r=form.querySelector('input[name=set]:checked');return r?r.value:''};
@@ -567,7 +580,7 @@ function oops(html){fail.innerHTML=html;fail.hidden=false}
 
 form.addEventListener('submit',async e=>{e.preventDefault();if(busy)return;fail.hidden=true;
   const bad=check();if(bad.length){const k=bad[0],el=k==='set'||k==='zone'?form.querySelector('input[name='+k+']'):form.elements[k];if(el)el.focus();return}
-  const f=form.elements,s=setOf(),n=q(),body={p_name:f.name.value.trim(),p_phone:phoneOf(f.phone.value),p_address:f.address.value.trim(),p_set:s,p_qty:n,p_note:f.note.value.trim()||null,p_source:src||null,p_hp:f.website.value||null,p_zone:zoneOf()};
+  const f=form.elements,s=setOf(),n=q(),body={p_name:f.name.value.trim(),p_phone:phoneOf(f.phone.value),p_address:f.address.value.trim(),p_set:s,p_qty:n,p_note:f.note.value.trim()||null,p_source:src||null,p_hp:f.website.value||null,p_zone:zoneOf(),p_channel:CH.ch,p_ref:CH.ref||null};
   busy=true;go.disabled=true;go.classList.add('is-busy');go.setAttribute('aria-label','Đang gửi đơn');
   const ac=new AbortController(),tm=setTimeout(()=>ac.abort(),15000);
   try{
