@@ -1,7 +1,7 @@
 /* Service worker cho app Lành Quản lý (phạm vi /quan-ly).
    Chỉ giữ khung trang (HTML, app.js, icon) để app mở nhanh và có trang dự phòng khi mất mạng.
    Không bao giờ đụng tới /api: đơn, chi phí, đăng nhập luôn đi thẳng lên máy chủ, không lưu trên máy. */
-const V = 'lanh-ql-v1';
+const V = 'lanh-ql-v2';
 const SHELL = ['/quan-ly', '/quan-ly/app.js', '/quan-ly/manifest.webmanifest', '/quan-ly/icons/icon-192.png'];
 
 self.addEventListener('install', e => {
