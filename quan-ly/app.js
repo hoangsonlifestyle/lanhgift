@@ -119,13 +119,14 @@ function alertNew(list){beep();document.title='('+list.length+') Đơn mới · 
     const plain=()=>{try{new Notification(t,opt)}catch(e){}};
     if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration('/quan-ly').then(r=>r?r.showNotification(t,opt):plain()).catch(plain);else plain()}}
 
-function showLogin(){$('app').hidden=true;$('login').hidden=false;$('out').hidden=true;$('bell').hidden=true;$('rf').hidden=true;$('sync').textContent='Cần đăng nhập';clearInterval(timer);setTimeout(()=>$('pass').focus(),50)}
-function showApp(){$('login').hidden=true;$('app').hidden=false;$('out').hidden=DEMO;$('rf').hidden=false;$('out2').hidden=DEMO;$('bell').hidden=DEMO||!('Notification' in window)||Notification.permission==='granted'}
-$('login').addEventListener('submit',async e=>{e.preventDefault();const b=$('go');b.disabled=true;$('lerr').textContent='';
-  try{const r=await fetch('/api/bo-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass:$('pass').value})});
-    if(!r.ok){$('lerr').textContent='Mã quản lý chưa đúng.';return}$('pass').value='';start()}
-  catch(err){$('lerr').textContent='Mạng đang lỗi, thử lại.'}finally{b.disabled=false}});
-const logout=async()=>{await fetch('/api/bo-login',{method:'DELETE'});if('clearAppBadge' in navigator)navigator.clearAppBadge().catch(()=>{});showLogin()};
+function showLogin(){$('app').hidden=true;$('login').hidden=false;$('out').hidden=true;$('bell').hidden=true;$('rf').hidden=true;$('sync').textContent='Cần đăng nhập';clearInterval(timer)}
+function showApp(){$('login').hidden=true;$('app').hidden=false;$('out').hidden=DEMO;$('rf').hidden=false;$('out2').hidden=DEMO;if(!DEMO&&!$('who').textContent)whoAmI();$('bell').hidden=DEMO||!('Notification' in window)||Notification.permission==='granted'}
+/* Đăng nhập bằng Google: /quan-ly/google chuyển sang Google rồi quay về đây; lỗi trả về qua ?loi= */
+const LOI={'huy':'Bạn đã huỷ đăng nhập Google.','khong-duoc-phep':'Tài khoản Google này chưa được cấp quyền vào trang quản lý của Lành.','het-han':'Phiên đăng nhập đã hết hạn, bấm đăng nhập lại.','chua-cai':'Đăng nhập Google chưa được cài trên máy chủ.','loi':'Không đăng nhập được bằng Google, thử lại.'};
+(()=>{const k=new URLSearchParams(location.search).get('loi');if(!k)return;$('lerr').textContent=LOI[k]||LOI.loi;history.replaceState(null,'',location.pathname+location.hash)})();
+$('go').addEventListener('click',()=>{$('go').classList.add('is-busy');setTimeout(()=>$('go').classList.remove('is-busy'),8000)});
+async function whoAmI(){try{const r=await fetch('/api/bo-login',{cache:'no-store'});if(r.ok){const j=await r.json();if(j.email){$('who').textContent='Đang đăng nhập: '+j.email;$('who').hidden=false}}}catch(e){}}
+const logout=async()=>{await fetch('/api/bo-login',{method:'DELETE'});$('who').textContent='';$('who').hidden=true;if('clearAppBadge' in navigator)navigator.clearAppBadge().catch(()=>{});showLogin()};
 $('out').addEventListener('click',logout);$('out2').addEventListener('click',logout);
 async function refresh(){const b=$('rf');if(b.classList.contains('spin'))return;b.classList.add('spin');try{await load()}finally{b.classList.remove('spin')}}
 $('rf').addEventListener('click',refresh);

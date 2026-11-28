@@ -10,13 +10,21 @@ function env(k) {
   return v;
 }
 
-function sign(exp) {
-  return crypto.createHmac('sha256', env('BO_KEY')).update('bo:' + exp).digest('base64url');
+// Phiên đăng nhập: hạn.email.chữ ký (HMAC bằng BO_KEY). Phiên kiểu cũ (đăng nhập bằng mã) không còn hợp lệ.
+function sign(exp, email) {
+  return crypto.createHmac('sha256', env('BO_KEY')).update('bo2:' + exp + ':' + email).digest('base64url');
 }
 
-function makeSession() {
+// Email được vào trang quản lý: biến môi trường BO_EMAILS, cách nhau dấu phẩy.
+function allowed(email) {
+  const list = (process.env.BO_EMAILS || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
+  return !!email && list.includes(String(email).toLowerCase());
+}
+
+function makeSession(email) {
   const exp = Math.floor(Date.now() / 1000) + DAYS * 86400;
-  return exp + '.' + sign(exp);
+  const e = String(email).toLowerCase();
+  return exp + '.' + Buffer.from(e).toString('base64url') + '.' + sign(exp, e);
 }
 
 function readCookie(req, name) {
@@ -33,11 +41,19 @@ function sameText(a, b) {
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 }
 
-function authed(req) {
+// Trả email của phiên nếu hợp lệ và email còn trong BO_EMAILS (gỡ email là mất quyền ngay), không thì ''.
+function sessionEmail(req) {
   const v = readCookie(req, COOKIE);
-  const [exp, sig] = v.split('.');
-  if (!exp || !sig || !/^\d+$/.test(exp) || +exp < Date.now() / 1000) return false;
-  return sameText(sig, sign(exp));
+  const [exp, e64, sig] = v.split('.');
+  if (!exp || !e64 || !sig || !/^\d+$/.test(exp) || +exp < Date.now() / 1000) return '';
+  let email = '';
+  try { email = Buffer.from(e64, 'base64url').toString('utf8'); } catch (e) { return ''; }
+  if (!sameText(sig, sign(exp, email))) return '';
+  return allowed(email) ? email : '';
+}
+
+function authed(req) {
+  return !!sessionEmail(req);
 }
 
 function setSession(res, value, maxAge) {
@@ -67,4 +83,4 @@ function noStore(res) {
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
 }
 
-module.exports = { COOKIE, DAYS, env, makeSession, authed, setSession, sameText, rpc, noStore };
+module.exports = { COOKIE, DAYS, env, makeSession, authed, sessionEmail, allowed, readCookie, setSession, sameText, rpc, noStore };

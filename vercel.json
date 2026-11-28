@@ -70,5 +70,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/quan-ly/google",
+      "destination": "/api/bo-google"
+    }
   ]
 }
