@@ -1,0 +1,25 @@
+{
+  "id": "/quan-ly",
+  "name": "Lành · Quản lý bán hàng",
+  "short_name": "Lành Quản lý",
+  "description": "Quản lý đơn, chi phí và chiến dịch của Lành Gift trên điện thoại.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "/quan-ly",
+  "scope": "/quan-ly",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6EDDC",
+  "theme_color": "#B5281C",
+  "categories": ["business", "productivity"],
+  "icons": [
+    { "src": "/quan-ly/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/quan-ly/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/quan-ly/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Ghi đơn", "short_name": "Ghi đơn", "url": "/quan-ly#ghi-don", "icons": [{ "src": "/quan-ly/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Đơn hàng", "short_name": "Đơn", "url": "/quan-ly#don", "icons": [{ "src": "/quan-ly/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Ghi chi", "short_name": "Ghi chi", "url": "/quan-ly#ghi-chi", "icons": [{ "src": "/quan-ly/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

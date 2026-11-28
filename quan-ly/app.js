@@ -107,6 +107,7 @@ async function load(){
     if($('app').hidden)showApp();
     $('sync').textContent=(DEMO?'Bản minh hoạ · ':'')+'Cập nhật '+new Date().toLocaleTimeString('vi-VN',{...tz,hour:'2-digit',minute:'2-digit'});
     render();
+    if(pendAct){const a=pendAct;pendAct=null;const c=camp();if(c&&c.status!=='settled')a==='new-order'?newOrderSheet():expSheet(null);else toast('Tạo chiến dịch trước khi ghi.')}
   }catch(e){if(e.message!=='login')$('sync').textContent='Lỗi tải dữ liệu, sẽ thử lại'}
 }
 function start(){load();clearInterval(timer);if(!DEMO)timer=setInterval(()=>{if(!document.hidden)load()},20000)}
@@ -114,15 +115,34 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden){document.
 function beep(){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();const t=audio.currentTime;
   [880,1175].forEach((f,i)=>{const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;o.type='sine';g.gain.setValueAtTime(0,t+i*.18);g.gain.linearRampToValueAtTime(.25,t+i*.18+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.18+.3);o.connect(g).connect(audio.destination);o.start(t+i*.18);o.stop(t+i*.18+.32)})}catch(e){}}
 function alertNew(list){beep();document.title='('+list.length+') Đơn mới · Lành';
-  if('Notification' in window&&Notification.permission==='granted'){const o=list[0];try{new Notification('Đơn mới '+o.code,{body:label(o)+' · '+vnd(pGot(o))+'\n'+o.name+' · '+phoneFmt(o.phone)+' · '+srcName(o.channel)})}catch(e){}}}
+  if('Notification' in window&&Notification.permission==='granted'){const o=list[0],t='Đơn mới '+o.code,opt={body:label(o)+' · '+vnd(pGot(o))+'\n'+o.name+' · '+phoneFmt(o.phone)+' · '+srcName(o.channel),icon:'/quan-ly/icons/icon-192.png',badge:'/quan-ly/icons/icon-192.png',tag:'don-'+o.code};
+    const plain=()=>{try{new Notification(t,opt)}catch(e){}};
+    if('serviceWorker' in navigator)navigator.serviceWorker.getRegistration('/quan-ly').then(r=>r?r.showNotification(t,opt):plain()).catch(plain);else plain()}}
 
-function showLogin(){$('app').hidden=true;$('login').hidden=false;$('out').hidden=true;$('bell').hidden=true;$('sync').textContent='Cần đăng nhập';clearInterval(timer);setTimeout(()=>$('pass').focus(),50)}
-function showApp(){$('login').hidden=true;$('app').hidden=false;$('out').hidden=DEMO;$('bell').hidden=DEMO||!('Notification' in window)||Notification.permission==='granted'}
+function showLogin(){$('app').hidden=true;$('login').hidden=false;$('out').hidden=true;$('bell').hidden=true;$('rf').hidden=true;$('sync').textContent='Cần đăng nhập';clearInterval(timer);setTimeout(()=>$('pass').focus(),50)}
+function showApp(){$('login').hidden=true;$('app').hidden=false;$('out').hidden=DEMO;$('rf').hidden=false;$('out2').hidden=DEMO;$('bell').hidden=DEMO||!('Notification' in window)||Notification.permission==='granted'}
 $('login').addEventListener('submit',async e=>{e.preventDefault();const b=$('go');b.disabled=true;$('lerr').textContent='';
   try{const r=await fetch('/api/bo-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pass:$('pass').value})});
     if(!r.ok){$('lerr').textContent='Mã quản lý chưa đúng.';return}$('pass').value='';start()}
   catch(err){$('lerr').textContent='Mạng đang lỗi, thử lại.'}finally{b.disabled=false}});
-$('out').addEventListener('click',async()=>{await fetch('/api/bo-login',{method:'DELETE'});showLogin()});
+const logout=async()=>{await fetch('/api/bo-login',{method:'DELETE'});if('clearAppBadge' in navigator)navigator.clearAppBadge().catch(()=>{});showLogin()};
+$('out').addEventListener('click',logout);$('out2').addEventListener('click',logout);
+async function refresh(){const b=$('rf');if(b.classList.contains('spin'))return;b.classList.add('spin');try{await load()}finally{b.classList.remove('spin')}}
+$('rf').addEventListener('click',refresh);
+/* Chạy như app (đã thêm vào màn hình chính): kéo xuống ở đầu trang để tải lại */
+const PWA=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+if(PWA)document.documentElement.classList.add('pwa');
+(()=>{if(!PWA)return;const el=$('ptr');let y0=null,p=0;
+  const reset=()=>{el.classList.remove('on','go');el.style.setProperty('--p',0)};
+  addEventListener('touchstart',e=>{y0=null;if(window.scrollY>2||document.body.classList.contains('lock')||$('app').hidden||e.touches.length>1)return;y0=e.touches[0].clientY;p=0},{passive:true});
+  addEventListener('touchmove',e=>{if(y0==null)return;p=Math.max(0,Math.min(110,(e.touches[0].clientY-y0)*.55));el.style.setProperty('--p',p.toFixed(1));el.classList.toggle('on',p>6);el.classList.toggle('go',p>70)},{passive:true});
+  addEventListener('touchend',async()=>{if(y0==null)return;y0=null;const go=p>70;p=0;reset();if(!go)return;el.classList.add('spin');try{await refresh()}finally{el.classList.remove('spin')}},{passive:true});
+  addEventListener('touchcancel',()=>{y0=null;p=0;reset()},{passive:true});
+})();
+/* Bàn phím mở (ô tìm đơn): giấu thanh dưới cho khỏi che */
+document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('input,textarea,select')&&!e.target.closest('#sheet-root'))document.body.classList.add('kb')});
+document.addEventListener('focusout',()=>setTimeout(()=>{const a=document.activeElement;if(!a||!a.matches||!a.matches('input,textarea,select'))document.body.classList.remove('kb')},60));
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/quan-ly-sw.js',{scope:'/quan-ly'}).catch(()=>{});
 $('bell').addEventListener('click',async()=>{beep();if('Notification' in window){const p=await Notification.requestPermission();if(p==='granted'){$('bell').hidden=true;toast('Đã bật báo đơn mới')}}});
 
 /* ---------------- tính toán ---------------- */
@@ -162,6 +182,15 @@ const dcls=n=>n>0?'pos':n<0?'neg':'';
 
 /* ---------------- khung chung ---------------- */
 const TABS=[['tong-quan','Tổng quan'],['don','Đơn hàng','Đơn'],['chi','Chi phí'],['chien-dich','Chiến dịch']];
+/* App trên điện thoại: thanh điều hướng dưới, nút Ghi đơn nổi ở giữa */
+const BN=[['tong-quan','Tổng quan','<path d="M3.5 11 12 4l8.5 7M5.5 9.5v10h13v-10"/><path d="M10 19.5v-5h4v5"/>'],
+  ['don','Đơn','<rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8.5h6M9 12h6M9 15.5h3.5"/>'],null,
+  ['chi','Chi phí','<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M15 15h3"/>'],
+  ['chien-dich','Chiến dịch','<path d="M5.5 21V4M5.5 4.5h11.5l-2.2 3.7 2.2 3.8H5.5"/>']];
+function rNav(c,todo){const can=!!c&&c.status!=='settled';
+  $('bn').innerHTML=BN.map(x=>x?`<button type="button" data-tab="${x[0]}"${S.tab===x[0]?' aria-current="page"':''}${x[0]==='don'&&todo?` aria-label="Đơn, ${todo} việc cần làm"`:''}><span class="bn__ic"><svg viewBox="0 0 24 24" aria-hidden="true">${x[2]}</svg></span>${x[1]}${x[0]==='don'&&todo?`<span class="n" aria-hidden="true">${todo>99?'99+':todo}</span>`:''}</button>`
+    :`<button type="button" class="bn__add" data-act="${can?'new-order':'no-order'}" aria-disabled="${!can}"><span class="bn__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>Ghi đơn</button>`).join('');
+  if(!DEMO&&'setAppBadge' in navigator){(todo?navigator.setAppBadge(todo):navigator.clearAppBadge()).catch(()=>{})}}
 function render(){
   const c=camp(),v=c?view(c):null;
   const todo=v?v.todo.moi+v.todo.dga+v.todo.noShip:0;
@@ -169,6 +198,7 @@ function render(){
   $('pick').innerHTML=D.campaigns.slice().sort((a,b)=>({running:0,draft:1,closed:2,settled:3}[a.status]-{running:0,draft:1,closed:2,settled:3}[b.status])||b.id-a.id).map(x=>
     `<button type="button" class="cp" data-camp="${x.id}" aria-pressed="${x.id===S.camp}"><b>${esc(x.name)}</b><span class="xs">${CSN[x.status]}${x.status==='running'&&daysTo(x.end_date)!=null?' · còn '+Math.max(0,daysTo(x.end_date))+' ngày':''}</span></button>`).join('')+
     `<button type="button" class="cp cp--add" data-act="new-camp"><b>+ Tạo chiến dịch</b></button>`;
+  rNav(c,todo);
   const fn={'tong-quan':rOverview,'don':rOrders,'chi':rExpenses,'chien-dich':rCampaigns}[S.tab];
   if(S.tab==='don'&&$('oq')&&$('view').dataset.tab==='don'&&$('view').dataset.camp==String(S.camp)){rOrderList();return}
   $('view').dataset.tab=S.tab;$('view').dataset.camp=String(S.camp);
@@ -757,6 +787,7 @@ document.addEventListener('click',async e=>{
   if(t.dataset.exp){expSheet(+t.dataset.exp);return}
   const a=t.dataset.act;
   if(a==='new-order')newOrderSheet();
+  else if(a==='no-order')toast(camp()?'Chiến dịch đã quyết toán, không ghi thêm đơn.':'Tạo chiến dịch trước khi ghi đơn.');
   else if(a==='new-exp')expSheet(null);
   else if(a==='new-camp')campSheet(null);
   else if(a==='edit-camp'&&camp())campSheet(camp().id);
@@ -797,6 +828,7 @@ async function demoApi(method,body){
 }
 
 const h=location.hash.replace('#','');if(TABS.some(([k])=>k===h))S.tab=h;
+let pendAct=h==='ghi-don'?'new-order':h==='ghi-chi'?'new-exp':null;if(pendAct)history.replaceState(null,'',(DEMO?'?demo=1':location.pathname));
 if(DEMO)$('demo').hidden=false;
 start();
 })();
